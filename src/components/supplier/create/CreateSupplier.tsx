@@ -11,11 +11,15 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
 import { useStore } from '../../../store';
-import { CreateSupplierDTO, UpdateSupplierDTO } from '../../../shared/models/supplier';
+import {
+  CreateSupplierRequest,
+  Suppliers,
+  UpdateSupplierRequest,
+} from '../../../shared/models/supplier';
 interface Props {
   open: boolean;
   isEdit?: boolean;
-  supplier?: any;
+  supplier?: Suppliers;
   onClose: () => void;
 }
 
@@ -38,10 +42,10 @@ const CreateSupplierDialog: React.FC<Props> = ({ open, isEdit, supplier, onClose
     email: Yup.string().email('Invalid email').required('Email is required'),
     phone: Yup.string().required('Phone number is required'),
     address: Yup.string(),
-    rating: Yup.number()
-      .required('Rating is required')
-      .min(0, 'Rating must be at least 0')
-      .max(5, 'Rating must be at most 5'),
+    // rating: Yup.number()
+    //   .required('Rating is required')
+    //   .min(0, 'Rating must be at least 0')
+    //   .max(5, 'Rating must be at most 5'),
   });
 
   return (
@@ -54,26 +58,22 @@ const CreateSupplierDialog: React.FC<Props> = ({ open, isEdit, supplier, onClose
             email: supplierData ? supplierData.email : '',
             phone: supplierData ? supplierData.phone : '',
             address: supplierData ? supplierData.address : '',
-            rating: supplierData ? supplierData.rating : '',
+            // rating: supplierData ? supplierData.rating : '',
           }}
           validationSchema={validationSchema}
           onSubmit={async (values) => {
             if (!isEdit) {
-              const createSupplierBody: CreateSupplierDTO = {
+              const newSupplier: CreateSupplierRequest = {
                 ...values,
-                userId: 1,
-                createdDate: new Date().toISOString().split('T')[0],
-                updatedDate: new Date().toISOString().split('T')[0],
+                isActive: 'Active',
               };
-              await createSupplier(createSupplierBody);
+              await createSupplier(newSupplier);
             } else {
-              const updateSupplierBody: UpdateSupplierDTO = {
+              const updatedSupplier: UpdateSupplierRequest = {
                 ...values,
-                userId: supplierData.userId,
-                createdDate: supplierData.createdDate,
-                updatedDate: new Date().toISOString().split('T')[0],
+                isActive: 'Active',
               };
-              await updateSupplier(updateSupplierBody, supplier.supplierId);
+              await updateSupplier(updatedSupplier, supplier!.guid);
             }
             await fetchAllSuppliers();
             onClose();
@@ -104,7 +104,7 @@ const CreateSupplierDialog: React.FC<Props> = ({ open, isEdit, supplier, onClose
                     helperText={touched.email && errors.email}
                   />
                 </Grid>
-                <Grid size={6}>
+                <Grid size={12}>
                   <TextField
                     fullWidth
                     name='phone'
@@ -115,7 +115,7 @@ const CreateSupplierDialog: React.FC<Props> = ({ open, isEdit, supplier, onClose
                     helperText={touched.phone && errors.phone}
                   />
                 </Grid>
-                <Grid size={6}>
+                {/* <Grid size={6}>
                   <TextField
                     fullWidth
                     name='rating'
@@ -126,7 +126,7 @@ const CreateSupplierDialog: React.FC<Props> = ({ open, isEdit, supplier, onClose
                     error={touched.rating && Boolean(errors.rating)}
                     helperText={touched.rating && errors.rating}
                   />
-                </Grid>
+                </Grid> */}
                 <Grid size={12}>
                   <TextField
                     fullWidth

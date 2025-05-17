@@ -1,22 +1,22 @@
 import { StoreSet } from '../store';
 import api from '../api/axios';
 import ENDPOINTS from '../api/endpoints';
-import { CreateSupplierDTO, SupplierDTO, UpdateSupplierDTO } from '../shared/models/supplier';
+import { CreateSupplierRequest, Suppliers, UpdateSupplierRequest } from '../shared/models/supplier';
 
 export interface SuppliersState {
-  suppliersList: any | undefined;
+  suppliersList: Suppliers[] | undefined;
 }
 
 export interface SuppliersActions {
   fetchAllSuppliers: () => Promise<void>;
-  fetchOneSupplier: (id: string) => Promise<void>;
-  createSupplier: (supplier: CreateSupplierDTO) => Promise<any>;
-  updateSupplier: (supplier: UpdateSupplierDTO, id: number) => Promise<void>;
-  deleteSupplier: (id: number) => Promise<void>;
+  fetchOneSupplier: (id: string) => Promise<Suppliers>;
+  createSupplier: (supplier: CreateSupplierRequest) => Promise<any>;
+  updateSupplier: (supplier: UpdateSupplierRequest, id: string) => Promise<void>;
+  deleteSupplier: (id: string) => Promise<void>;
 }
 
 export const initialSuppliers: SuppliersState = {
-  suppliersList: undefined,
+  suppliersList: [],
 };
 
 export function suppliersActions(set: StoreSet): SuppliersActions {
@@ -34,39 +34,31 @@ export function suppliersActions(set: StoreSet): SuppliersActions {
     fetchOneSupplier: async (id: string) => {
       try {
         const response = await api.get(`${ENDPOINTS.SUPPLIER.GET_ONE}/${id}`);
-        set((state) => {
-          state.suppliers.suppliersList = response.data;
-        });
+        return response.data;
       } catch (error: any) {
         console.log(error);
       }
     },
-    createSupplier: async (supplier: CreateSupplierDTO) => {
+    createSupplier: async (supplier: CreateSupplierRequest) => {
       try {
-        const response = await api.post(ENDPOINTS.SUPPLIER.CREATE, supplier);
-        set((state) => {
-          state.suppliers.suppliersList = response.data;
-        });
+        await api.post(ENDPOINTS.SUPPLIER.CREATE, supplier);
       } catch (error: any) {
         console.log(error);
       }
     },
-    updateSupplier: async (supplier: UpdateSupplierDTO, id: number) => {
+    updateSupplier: async (supplier: UpdateSupplierRequest, id: string) => {
       try {
-        const response = await api.put(`${ENDPOINTS.SUPPLIER.UPDATE(id.toString())}`, supplier);
-        set((state) => {
-          state.suppliers.suppliersList = response.data;
-        });
+        await api.put(ENDPOINTS.SUPPLIER.UPDATE(id), supplier);
       } catch (error: any) {
         console.log(error);
       }
     },
-    deleteSupplier: async (id: number) => {
+    deleteSupplier: async (id: string) => {
       try {
-        const response = await api.delete(`${ENDPOINTS.SUPPLIER.DELETE(id.toString())}`);
+        const response = await api.delete(ENDPOINTS.SUPPLIER.DELETE(id));
         set((state) => {
-          state.suppliers.suppliersList = state.suppliers.suppliersList.filter(
-            (supplier: any) => supplier.supplierId !== id,
+          state.suppliers.suppliersList = state.suppliers.suppliersList?.filter(
+            (supplier: Suppliers) => supplier.guid !== id,
           );
         });
         return response.data;

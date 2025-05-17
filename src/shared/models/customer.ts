@@ -1,33 +1,25 @@
-export interface CustomerDTO {
+export interface Customers {
   id: number;
   name: string;
-  address: string;
   phone: string;
   email: string;
-  status: boolean;
-  bankcard: string;
-  createdDate: string;
-  updatedDate: string;
+  address: string;
+  bankCard: string;
+  guid: string;
 }
 
-export interface CustomerCreateDTO {
+export interface CustomerCreateRequest {
   name: string;
   address: string;
   phone: string;
   email: string;
-  status: boolean;
-  bankcard: string;
-  createdDate: string;
-  updatedDate: string;
+  bankCard: string;
 }
 
-export interface CustomerUpdateDTO {
+export interface CustomerUpdateRequest {
   name: string;
   address: string;
   phone: string;
   email: string;
-  status: boolean;
-  bankcard: string;
-  createdDate: string;
-  updatedDate: string;
+  bankCard: string;
 }

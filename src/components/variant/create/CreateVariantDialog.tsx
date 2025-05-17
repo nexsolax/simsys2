@@ -6,20 +6,17 @@ import {
   TextField,
   Button,
   Grid2 as Grid,
-  IconButton,
-  Box,
-  Typography,
 } from '@mui/material';
-import { Formik, Form, FieldArray } from 'formik';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
+
 import { useStore } from '../../../store';
+import { Variant } from '../../../shared/models/variant';
 
 interface Props {
   open: boolean;
   isEdit?: boolean;
-  variant?: any;
+  variant?: Variant;
   onClose: () => void;
 }
 
@@ -27,12 +24,8 @@ const CreateVariantDialog: React.FC<Props> = ({ open, isEdit, variant, onClose }
   const [variantData, setVariantData] = useState<any>();
 
   const fetchAllVariants = useStore((state) => state.fetchAllVariants);
-  const fetchAllVariantsValue = useStore((state) => state.fetchAllVariantsValue);
   const createVariant = useStore((state) => state.createVariant);
-  const createVariantValue = useStore((state) => state.createVariantValue);
   const updateVariant = useStore((state) => state.updateVariant);
-  const updateVariantValue = useStore((state) => state.updateVariantValue);
-  const deleteVariantValue = useStore((state) => state.deleteVariantValue);
 
   useEffect(() => {
     if (isEdit && variant) {
@@ -43,12 +36,8 @@ const CreateVariantDialog: React.FC<Props> = ({ open, isEdit, variant, onClose }
   }, [isEdit, variant]);
 
   const validationSchema = Yup.object({
-    name: Yup.string().required('Name is required'),
-    variantValues: Yup.array().of(
-      Yup.object().shape({
-        value: Yup.string().required('Value is required'),
-      }),
-    ),
+    color: Yup.string().required('Color is required'),
+    size: Yup.string().required('Size is required'),
   });
 
   return (
@@ -57,27 +46,17 @@ const CreateVariantDialog: React.FC<Props> = ({ open, isEdit, variant, onClose }
       <DialogContent>
         <Formik
           initialValues={{
-            name: variantData ? variantData.name : '',
-            variantValues: variantData ? variantData.variantValues : [{ value: '' }],
+            color: variantData ? variantData.color : '',
+            size: variantData ? variantData.size : '',
           }}
           validationSchema={validationSchema}
           onSubmit={async (values) => {
-            const variantsPromise = [];
             if (!isEdit) {
-              const newVariant = await createVariant(values.name);
-              for (const variantValue of values.variantValues) {
-                variantsPromise.push(createVariantValue(variantValue.value, newVariant.variantId));
-              }
-              await Promise.all(variantsPromise);
+              await createVariant(values);
             } else {
-              variantsPromise.push(updateVariant(values.name, variantData!.variantId));
-              for (const variantValue of values.variantValues) {
-                variantsPromise.push(updateVariantValue(variantValue, variantValue.variantValueId));
-              }
-              await Promise.all(variantsPromise);
+              await updateVariant(values, variantData!.id);
             }
             await fetchAllVariants();
-            await fetchAllVariantsValue();
             onClose();
           }}
         >
@@ -87,65 +66,26 @@ const CreateVariantDialog: React.FC<Props> = ({ open, isEdit, variant, onClose }
                 <Grid size={12}>
                   <TextField
                     fullWidth
-                    name='name'
-                    label='Variant Name'
-                    value={values.name}
+                    name='color'
+                    label='Color'
+                    value={values.color}
                     onChange={handleChange}
-                    error={touched.name && Boolean(errors.name)}
-                    helperText={touched.name && errors.name}
+                    error={touched.color && Boolean(errors.color)}
+                    helperText={touched.color && errors.color}
                   />
                 </Grid>
 
-                <FieldArray name='variantValues'>
-                  {({ push, remove }) => (
-                    <Grid size={12}>
-                      <Box>
-                        <Typography fontWeight={600} variant='caption'>
-                          Variant Values
-                        </Typography>
-                        {values.variantValues.map((_, index) => (
-                          <Box key={index} display='flex' alignItems='center' mt={2}>
-                            <TextField
-                              fullWidth
-                              name={`variantValues.${index}.value`}
-                              label={`Value ${index + 1}`}
-                              value={values.variantValues[index].value}
-                              onChange={handleChange}
-                              error={
-                                touched.variantValues?.[index]?.value &&
-                                Boolean(errors.variantValues?.[index]?.value)
-                              }
-                              helperText={
-                                touched.variantValues?.[index]?.value &&
-                                errors.variantValues?.[index]?.value
-                              }
-                            />
-                            <IconButton
-                              onClick={async () => {
-                                remove(index);
-                                await deleteVariantValue(
-                                  values.variantValues[index].variantValueId,
-                                );
-                              }}
-                              disabled={values.variantValues.length === 1}
-                            >
-                              <RemoveIcon />
-                            </IconButton>
-                          </Box>
-                        ))}
-                        <Button
-                          startIcon={<AddIcon />}
-                          onClick={() => {
-                            push({ value: '' });
-                          }}
-                          sx={{ mt: 1 }}
-                        >
-                          Add Value
-                        </Button>
-                      </Box>
-                    </Grid>
-                  )}
-                </FieldArray>
+                <Grid size={12}>
+                  <TextField
+                    fullWidth
+                    name='size'
+                    label='Size'
+                    value={values.size}
+                    onChange={handleChange}
+                    error={touched.size && Boolean(errors.size)}
+                    helperText={touched.size && errors.size}
+                  />
+                </Grid>
               </Grid>
 
               <Grid container justifyContent='flex-end' mt={2}>

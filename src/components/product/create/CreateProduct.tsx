@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,12 +12,12 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  IconButton,
+  Paper,
   FormGroup,
   FormControlLabel,
   Checkbox,
   ListItemText,
-  IconButton,
-  Paper,
   Autocomplete,
   Chip,
 } from '@mui/material';
@@ -27,38 +27,39 @@ import { useDropzone } from 'react-dropzone';
 import CloseIcon from '@mui/icons-material/Close';
 
 import { uploadIcon, uploadImageIcon } from '../../../shared/icon/icon';
+import { useStore } from '../../../store';
+import {
+  CreateProductRequest,
+  Products,
+  UpdateProductRequest,
+} from '../../../shared/models/product';
+import { Categories } from '../../../shared/models/category';
+import { Variant } from '../../../shared/models/variant';
 
 interface Props {
   open: boolean;
+  isEdit?: boolean;
+  product?: Products;
   onClose: () => void;
 }
 
-const CreateProductDialog: React.FC<Props> = ({ open, onClose }) => {
-  const sizeOptions = ['7', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12', '13'];
-  const tags = ['Education', 'Food and Beverage', 'Home and Garden', 'Sports', 'Entertainment'];
-  const categories = [
-    {
-      id: 1,
-      name: 'Áo thun tay ngắn',
-    },
-    {
-      id: 2,
-      name: 'Áo thun tay dài',
-    },
-    {
-      id: 3,
-      name: 'Áo thun thế thao',
-    },
-    {
-      id: 4,
-      name: 'Áo thun ba lỗ',
-    },
-    {
-      id: 5,
-      name: 'Áo thun sweater',
-    },
-  ];
+const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }) => {
+  // const sizeOptions = ['7', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12', '13'];
+  // const tags = ['Education', 'Food and Beverage', 'Home and Garden', 'Sports', 'Entertainment'];
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
+  const [productData, setProductData] = useState<Products | null>(null);
+
+  const fetchAllProducts = useStore((state) => state.fetchAllProducts);
+  const createProduct = useStore((state) => state.createProduct);
+  const updateProduct = useStore((state) => state.updateProduct);
+  const categoriesList = useStore((state) => state.categories.categoriesList);
+  const variantsList = useStore((state) => state.variants.variantsList);
+
+  useEffect(() => {
+    if (product) {
+      setProductData(product);
+    }
+  }, [product]);
 
   const onDrop = (acceptedFiles: File[]) => {
     const newImages = acceptedFiles.map((file) => ({
@@ -86,19 +87,33 @@ const CreateProductDialog: React.FC<Props> = ({ open, onClose }) => {
   };
 
   const validationSchema = Yup.object().shape({
-    productName: Yup.string().required('Product name is required'),
-    productSKU: Yup.string().required('Product SKU is required'),
-    price: Yup.number().required('Price is required').positive('Price must be positive'),
+    name: Yup.string().required('Product name is required'),
     quantity: Yup.number().required('Quantity is required').min(1, 'Minimum 1 item'),
     description: Yup.string().required('Description is required'),
-    size: Yup.array().min(1, 'Select at least one size'),
-    category: Yup.string().required('Category is required'),
-    gender: Yup.array().min(1, 'Select at least one gender'),
-    tags: Yup.array().min(1, 'Select at least one tag'),
+    variantGuid: Yup.string().required('Variant is required'),
+    categoryGuid: Yup.string().required('Category is required'),
+    // price: Yup.number().required('Price is required').positive('Price must be positive'),
+    // productSKU: Yup.string().required('Product SKU is required'),
+    // size: Yup.array().min(1, 'Select at least one size'),
+    // gender: Yup.array().min(1, 'Select at least one gender'),
+    // tags: Yup.array().min(1, 'Select at least one tag'),
   });
 
-  const handleSubmit = (values, { resetForm }) => {
-    console.log('Product Data:', values);
+  const handleSubmit = async (values: any, { resetForm }: any) => {
+    if (!isEdit) {
+      const newProduct: CreateProductRequest = {
+        ...values,
+        status: 'Active',
+      };
+      await createProduct(newProduct);
+    } else {
+      const updatedProduct: UpdateProductRequest = {
+        ...values,
+        status: 'Active',
+      };
+      await updateProduct(updatedProduct, productData!.id);
+    }
+    await fetchAllProducts();
     resetForm();
     onClose();
   };
@@ -108,35 +123,32 @@ const CreateProductDialog: React.FC<Props> = ({ open, onClose }) => {
       <DialogTitle>Create Product</DialogTitle>
       <Formik
         initialValues={{
-          productName: '',
-          productSKU: '',
-          price: '',
-          quantity: '',
-          description: '',
-          size: [''],
-          category: '',
-          gender: [''],
-          tags: [''],
+          name: product?.name || '',
+          quantity: product?.quantity || '',
+          description: product?.description || '',
+          status: product?.status || '',
+          categoryGuid: product?.categoryGuid || '',
+          variantGuid: product?.variantGuid || '',
         }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ handleChange, handleBlur, setFieldValue, values }) => (
+        {({ handleChange, handleBlur, setFieldValue, values, errors }) => (
           <Form>
             <DialogContent>
               <Box display='flex' flexDirection='column' gap={2}>
                 <Field
                   as={TextField}
                   label='Product Name'
-                  name='productName'
+                  name='name'
                   fullWidth
                   variant='outlined'
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  value={values.productName}
-                  error={!!values.productName && !!values.productName.error}
+                  value={values.name}
+                  error={!!values.name && Boolean(errors.name)}
                   helperText={
-                    <ErrorMessage name='productName'>
+                    <ErrorMessage name='name'>
                       {(msg) => (
                         <Typography variant='caption' color='error' sx={{ marginTop: '4px' }}>
                           {msg}
@@ -147,6 +159,101 @@ const CreateProductDialog: React.FC<Props> = ({ open, onClose }) => {
                 />
 
                 <Field
+                  as={TextField}
+                  label='Quantity'
+                  name='quantity'
+                  type='number'
+                  fullWidth
+                  variant='outlined'
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.quantity}
+                  error={!!values.quantity && Boolean(errors.quantity)}
+                  helperText={
+                    <ErrorMessage name='quantity'>
+                      {(msg) => (
+                        <Typography variant='caption' color='error' sx={{ marginTop: '4px' }}>
+                          {msg}
+                        </Typography>
+                      )}
+                    </ErrorMessage>
+                  }
+                />
+
+                <Field
+                  as={TextField}
+                  label='Description'
+                  name='description'
+                  fullWidth
+                  multiline
+                  rows={4}
+                  variant='outlined'
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.description}
+                  error={!!values.description && Boolean(errors.description)}
+                  helperText={
+                    <ErrorMessage name='description'>
+                      {(msg) => (
+                        <Typography variant='caption' color='error' sx={{ marginTop: '4px' }}>
+                          {msg}
+                        </Typography>
+                      )}
+                    </ErrorMessage>
+                  }
+                />
+
+                <FormControl fullWidth>
+                  <InputLabel>Category</InputLabel>
+                  <Field
+                    as={Select}
+                    name='categoryGuid'
+                    label='Category'
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.categoryGuid}
+                  >
+                    {categoriesList?.map((category: Categories) => (
+                      <MenuItem key={category.id} value={category.guid}>
+                        {category.name}
+                      </MenuItem>
+                    ))}
+                  </Field>
+                  <Typography
+                    variant='caption'
+                    color='error'
+                    sx={{ marginLeft: 2, marginTop: '4px' }}
+                  >
+                    <ErrorMessage name='category' />
+                  </Typography>
+                </FormControl>
+
+                <FormControl fullWidth>
+                  <InputLabel>Variant</InputLabel>
+                  <Field
+                    as={Select}
+                    name='variantGuid'
+                    label='Variant'
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.variantGuid}
+                  >
+                    {variantsList?.map((variant: Variant) => (
+                      <MenuItem key={variant.id} value={variant.guid}>
+                        {variant.color + ' ' + variant.size}
+                      </MenuItem>
+                    ))}
+                  </Field>
+                  <Typography
+                    variant='caption'
+                    color='error'
+                    sx={{ marginLeft: 2, marginTop: '4px' }}
+                  >
+                    <ErrorMessage name='category' />
+                  </Typography>
+                </FormControl>
+
+                {/* <Field
                   as={TextField}
                   label='Product SKU'
                   name='productSKU'
@@ -187,79 +294,9 @@ const CreateProductDialog: React.FC<Props> = ({ open, onClose }) => {
                       )}
                     </ErrorMessage>
                   }
-                />
+                /> */}
 
-                <Field
-                  as={TextField}
-                  label='Quantity'
-                  name='quantity'
-                  type='number'
-                  fullWidth
-                  variant='outlined'
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.quantity}
-                  error={!!values.quantity && !!values.quantity.error}
-                  helperText={
-                    <ErrorMessage name='quantity'>
-                      {(msg) => (
-                        <Typography variant='caption' color='error' sx={{ marginTop: '4px' }}>
-                          {msg}
-                        </Typography>
-                      )}
-                    </ErrorMessage>
-                  }
-                />
-
-                <Field
-                  as={TextField}
-                  label='Description'
-                  name='description'
-                  fullWidth
-                  multiline
-                  rows={4}
-                  variant='outlined'
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  value={values.description}
-                  error={!!values.description && !!values.description.error}
-                  helperText={
-                    <ErrorMessage name='description'>
-                      {(msg) => (
-                        <Typography variant='caption' color='error' sx={{ marginTop: '4px' }}>
-                          {msg}
-                        </Typography>
-                      )}
-                    </ErrorMessage>
-                  }
-                />
-
-                <FormControl fullWidth>
-                  <InputLabel>Category</InputLabel>
-                  <Field
-                    as={Select}
-                    name='category'
-                    label='Category'
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.category}
-                  >
-                    {categories.map((category) => (
-                      <MenuItem key={category} value={category.id}>
-                        {category.name}
-                      </MenuItem>
-                    ))}
-                  </Field>
-                  <Typography
-                    variant='caption'
-                    color='error'
-                    sx={{ marginLeft: 2, marginTop: '4px' }}
-                  >
-                    <ErrorMessage name='category' />
-                  </Typography>
-                </FormControl>
-
-                <FormControl>
+                {/* <FormControl>
                   <Autocomplete
                     autoSelect={true}
                     multiple
@@ -346,7 +383,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, onClose }) => {
                   >
                     <ErrorMessage name='gender' />
                   </Typography>
-                </FormControl>
+                </FormControl> */}
 
                 <Paper>
                   <Box>

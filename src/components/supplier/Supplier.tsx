@@ -7,6 +7,7 @@ import { useStore } from '../../store';
 import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import CreateSupplierDialog from './create/CreateSupplier';
 import ConfirmationDialog from '../confirmation/ConfirmationModal';
+import { Suppliers } from '../../shared/models/supplier';
 
 const Supplier: React.FC = () => {
   const fetchAllSuppliers = useStore((state) => state.fetchAllSuppliers);
@@ -16,7 +17,7 @@ const Supplier: React.FC = () => {
   const [openCreateSupplier, setOpenCreateSupplier] = useState(false);
   const [openEditSupplier, setOpenEditSupplier] = useState(false);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
-  const [suppliersData, setSuppliersData] = useState<any[]>([]);
+  const [suppliersData, setSuppliersData] = useState<Suppliers[]>([]);
 
   useEffect(() => {
     fetchAllSuppliers();
@@ -24,21 +25,22 @@ const Supplier: React.FC = () => {
 
   useEffect(() => {
     if (suppliersList && suppliersList.length > 0) {
-      const newSuppliersData = suppliersList.map((supplier: any) => ({
-        ...supplier,
-        id: supplier.supplierId,
-      }));
-      setSuppliersData(newSuppliersData);
+      setSuppliersData(suppliersList);
     }
   }, [suppliersList]);
 
-  const [currentSupplier, setCurrentSupplier] = useState<any>(null);
+  const [currentSupplier, setCurrentSupplier] = useState<Suppliers>();
 
   const columnsSupplier: GridColDef[] = [
     {
+      field: 'id',
+      headerName: 'ID',
+      width: 60,
+    },
+    {
       field: 'name',
       headerName: 'Name',
-      width: 80,
+      width: 200,
       flex: 1,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -64,16 +66,28 @@ const Supplier: React.FC = () => {
     },
     { field: 'phone', headerName: 'Phone number', width: 180 },
     { field: 'address', headerName: 'Address', width: 220 },
-    { field: 'createdDate', headerName: 'Created date', width: 180 },
+    // {
+    //   field: 'rating',
+    //   headerName: 'Rating',
+    //   width: 120,
+    //   renderCell: (params) => {
+    //     return (
+    //       <Chip
+    //         color={params.value >= 4 ? 'success' : params.value >= 2.5 ? 'warning' : 'error'}
+    //         label={params.value ? params.value?.toFixed(1) : 'N/A'}
+    //       />
+    //     );
+    //   },
+    // },
     {
-      field: 'rating',
-      headerName: 'Rating',
+      field: 'isActive',
+      headerName: 'Status',
       width: 120,
       renderCell: (params) => {
         return (
           <Chip
-            color={params.value >= 4 ? 'success' : params.value >= 2.5 ? 'warning' : 'error'}
-            label={params.value ? params.value?.toFixed(1) : 'N/A'}
+            color={params.value === 'Active' ? 'success' : 'error'}
+            label={params.value === 'Active' ? 'Active' : 'Inactive'}
           />
         );
       },
@@ -139,7 +153,6 @@ const Supplier: React.FC = () => {
             <DataGrid
               rows={suppliersData}
               columns={columnsSupplier}
-              getRowId={(row) => row.supplierId}
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
               checkboxSelection
@@ -168,7 +181,7 @@ const Supplier: React.FC = () => {
         type='warning'
         onClose={() => setConfirmDelete(false)}
         onConfirm={async () => {
-          await deleteSupplier(currentSupplier.supplierId);
+          await deleteSupplier(currentSupplier!.guid);
           await fetchAllSuppliers();
           setConfirmDelete(false);
         }}

@@ -11,12 +11,16 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
 import { useStore } from '../../../store';
-import { CustomerCreateDTO, CustomerUpdateDTO } from '../../../shared/models/customer';
+import {
+  CustomerCreateRequest,
+  Customers,
+  CustomerUpdateRequest,
+} from '../../../shared/models/customer';
 
 interface Props {
   open: boolean;
   isEdit?: boolean;
-  customer?: any;
+  customer?: Customers;
   onClose: () => void;
 }
 
@@ -39,7 +43,7 @@ const CreateCustomerDialog: React.FC<Props> = ({ open, isEdit, customer, onClose
     email: Yup.string().email('Invalid email').required('Email is required'),
     phone: Yup.string().required('Phone number is required'),
     address: Yup.string(),
-    bankcard: Yup.string(),
+    bankCard: Yup.string(),
   });
 
   return (
@@ -52,26 +56,20 @@ const CreateCustomerDialog: React.FC<Props> = ({ open, isEdit, customer, onClose
             email: customerData ? customerData.email : '',
             phone: customerData ? customerData.phone : '',
             address: customerData ? customerData.address : '',
-            bankcard: customerData ? customerData.bankcard : '',
+            bankCard: customerData ? customerData.bankCard : '',
           }}
           validationSchema={validationSchema}
           onSubmit={async (values) => {
             if (!isEdit) {
-              const createCustomerBody: CustomerCreateDTO = {
+              const newCustomer: CustomerCreateRequest = {
                 ...values,
-                status: true,
-                createdDate: new Date().toISOString().split('T')[0],
-                updatedDate: new Date().toISOString().split('T')[0],
               };
-              await createCustomer(createCustomerBody);
+              await createCustomer(newCustomer);
             } else {
-              const updateCustomerBody: CustomerUpdateDTO = {
+              const updatedCustomer: CustomerUpdateRequest = {
                 ...values,
-                status: true,
-                createdDate: customerData.createdDate,
-                updatedDate: new Date().toISOString().split('T')[0],
               };
-              await updateCustomer(updateCustomerBody, customerData.id);
+              await updateCustomer(updatedCustomer, customerData.id);
             }
             await fetchAllCustomers();
             onClose();
@@ -116,9 +114,9 @@ const CreateCustomerDialog: React.FC<Props> = ({ open, isEdit, customer, onClose
                 <Grid size={6}>
                   <TextField
                     fullWidth
-                    name='bankcard'
+                    name='bankCard'
                     label='Bank card'
-                    value={values.bankcard}
+                    value={values.bankCard}
                     onChange={handleChange}
                   />
                 </Grid>

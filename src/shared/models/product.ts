@@ -1,9 +1,33 @@
-export interface ProductDTO {
-  productid: number;
+import { Categories } from './category';
+import { Variant } from './variant';
+
+export interface Products {
+  id: number;
   name: string;
-  saleprice: number;
   quantity: number;
   description: string;
-  status: boolean;
-  consignmentid: number;
+  status: string;
+  guid: string;
+  categoryGuid: string;
+  variantGuid: string;
+  category: Categories;
+  variant: Variant;
+}
+
+export interface CreateProductRequest {
+  name: string;
+  quantity: number;
+  description: string;
+  status: string;
+  categoryGuid: string;
+  variantGuid: string;
+}
+
+export interface UpdateProductRequest {
+  name: string;
+  quantity: number;
+  description: string;
+  status: string;
+  categoryGuid: string;
+  variantGuid: string;
 }

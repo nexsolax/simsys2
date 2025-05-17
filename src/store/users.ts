@@ -1,21 +1,21 @@
 import { StoreSet } from '../store';
 import api from '../api/axios';
 import ENDPOINTS from '../api/endpoints';
-import { User, UserCreateDTO, UserUpdateDTO } from '../shared/models/user';
+import { Users, UserCreateRequest, UserUpdateRequest } from '../shared/models/user';
 
 export interface UsersState {
-  usersList: User[] | undefined;
+  usersList: Users[] | undefined;
 }
 
 export interface UsersActions {
   fetchAllUsers: () => Promise<void>;
-  createUser: (user: UserCreateDTO) => Promise<void>;
-  updateUser: (id: number, user: UserUpdateDTO) => Promise<void>;
+  createUser: (user: UserCreateRequest) => Promise<void>;
+  updateUser: (id: number, user: UserUpdateRequest) => Promise<void>;
   deleteUser: (id: number) => Promise<void>;
 }
 
 export const initialUsers: UsersState = {
-  usersList: undefined,
+  usersList: [],
 };
 
 export function usersActions(set: StoreSet): UsersActions {
@@ -30,17 +30,14 @@ export function usersActions(set: StoreSet): UsersActions {
         console.log(error);
       }
     },
-    createUser: async (user: UserCreateDTO) => {
+    createUser: async (user: UserCreateRequest) => {
       try {
-        const response = await api.post(ENDPOINTS.USER.CREATE, user);
-        set((state) => {
-          state.users.usersList = [...state.users.usersList!, response.data];
-        });
+        await api.post(ENDPOINTS.USER.CREATE, user);
       } catch (error: any) {
         console.log(error);
       }
     },
-    updateUser: async (id: number, user: UserUpdateDTO) => {
+    updateUser: async (id: number, user: UserUpdateRequest) => {
       try {
         await api.put(ENDPOINTS.USER.UPDATE(id.toString()), user);
       } catch (error: any) {
@@ -51,7 +48,7 @@ export function usersActions(set: StoreSet): UsersActions {
       try {
         await api.delete(ENDPOINTS.USER.DELETE(id.toString()));
         set((state) => {
-          state.users.usersList = state.users.usersList!.filter((user: any) => user.userId !== id);
+          state.users.usersList = state.users.usersList!.filter((user: Users) => user.id !== id);
         });
       } catch (error: any) {
         console.log(error);

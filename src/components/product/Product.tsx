@@ -16,35 +16,38 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import CreateProductDialog from './create/CreateProduct';
 import { useStore } from '../../store';
+import { Products } from '../../shared/models/product';
+import { Categories } from '../../shared/models/category';
+import { Variant } from '../../shared/models/variant';
+import ConfirmationDialog from '../confirmation/ConfirmationModal';
 
 const Product: React.FC = () => {
   const navigate = useNavigate();
   const fetchAllProducts = useStore((state) => state.fetchAllProducts);
-  const fetchAllConsignments = useStore((state) => state.fetchAllConsignments);
+  const fetchAllCategories = useStore((state) => state.fetchAllCategories);
+  const fetchAllVariants = useStore((state) => state.fetchAllVariants);
+  const deleteProduct = useStore((state) => state.deleteProduct);
 
   const productsList = useStore((state) => state.products.productsList);
-  const consignmentsList = useStore((state) => state.consignments.consignmentsList);
+  const categoriesList = useStore((state) => state.categories.categoriesList);
+  const variantsList = useStore((state) => state.variants.variantsList);
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
   const [openCreateProduct, setOpenCreateProduct] = useState(false);
-  const [productsData, setProductsData] = useState<any[]>([]);
+  const [openEditProduct, setOpenEditProduct] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Products | null>(null);
+  const [productsData, setProductsData] = useState<Products[]>([]);
 
   useEffect(() => {
     fetchAllProducts();
-    fetchAllConsignments();
+    fetchAllCategories();
+    fetchAllVariants();
   }, []);
 
   useEffect(() => {
-    if (productsList && consignmentsList) {
-      const newProductsData = productsList.map((product: any) => ({
-        ...product,
-        id: product.productid,
-        consignment: consignmentsList.find(
-          (consignment: any) => consignment.id === product.consignmentid,
-        ),
-      }));
-      console.log(newProductsData);
-      setProductsData(newProductsData);
+    if (productsList) {
+      setProductsData(productsList);
     }
-  }, [productsList, consignmentsList]);
+  }, [productsList]);
 
   const columnsProduct: GridColDef[] = [
     {
@@ -76,7 +79,11 @@ const Product: React.FC = () => {
               {params.row.name}
             </Typography>
             <Typography fontSize={'13px'} mt={0.5} sx={{ color: 'var(--palette-text-secondary)' }}>
-              {params.row.category}
+              {
+                categoriesList?.find(
+                  (category: Categories) => category.guid === params.row.categoryGuid,
+                )?.name
+              }
             </Typography>
           </Box>
         </Box>
@@ -94,25 +101,23 @@ const Product: React.FC = () => {
       ),
     },
     {
-      field: 'importDate',
-      headerName: 'Import Date',
+      field: 'variant',
+      headerName: 'Variant',
       width: 150,
       renderCell: (params) => (
         <Box>
-          <Typography variant='body2'>
-            {new Date(params.row.consignment.importDate).toISOString().split('T')[0]}
+          <Typography variant='body2' textTransform={'capitalize'}>
+            {variantsList?.find((variant: Variant) => variant.guid === params.row.variantGuid)
+              ?.color +
+              ' ' +
+              variantsList?.find((variant: Variant) => variant.guid === params.row.variantGuid)
+                ?.size}
           </Typography>
         </Box>
       ),
     },
     {
-      field: 'saleprice',
-      headerName: 'Price ($)',
-      width: 120,
-      valueFormatter: (params: number) => `${params ? `${params.toLocaleString()}đ` : 0}`,
-    },
-    {
-      field: 'stock',
+      field: 'quantity',
       headerName: 'Stock',
       width: 120,
       renderCell: (params) => (
@@ -143,8 +148,8 @@ const Product: React.FC = () => {
       width: 100,
       renderCell: (params) => (
         <Chip
-          color={params.value ? 'info' : 'default'}
-          label={params.value ? 'Active' : 'Inactive'}
+          color={params.value === 'Active' ? 'info' : 'default'}
+          label={params.value === 'Active' ? 'Active' : 'Inactive'}
         />
       ),
     },
@@ -153,12 +158,25 @@ const Product: React.FC = () => {
       headerName: '',
       width: 80,
       sortable: false,
-      renderCell: () => (
+      renderCell: (params) => (
         <Box>
-          <IconButton size='small'>
+          <IconButton
+            size='small'
+            onClick={() => {
+              setOpenCreateProduct(true);
+              setOpenEditProduct(true);
+              setCurrentProduct(params.row);
+            }}
+          >
             <img width={18} height={18} src={pencilIcon} alt='' />
           </IconButton>
-          <IconButton size='small'>
+          <IconButton
+            size='small'
+            onClick={() => {
+              setOpenConfirmDelete(true);
+              setCurrentProduct(params.row);
+            }}
+          >
             <img width={18} height={18} src={trashIcon} alt='' />
           </IconButton>
         </Box>
@@ -208,8 +226,24 @@ const Product: React.FC = () => {
 
       <CreateProductDialog
         open={openCreateProduct}
+        isEdit={openEditProduct}
+        product={currentProduct!}
         onClose={() => {
           setOpenCreateProduct(false);
+          setOpenEditProduct(false);
+        }}
+      />
+
+      <ConfirmationDialog
+        open={openConfirmDelete}
+        title='Delete supplier'
+        description='Are you sure you want to delete this supplier?'
+        type='warning'
+        onClose={() => setOpenConfirmDelete(false)}
+        onConfirm={async () => {
+          await deleteProduct(currentProduct!.id);
+          await fetchAllProducts();
+          setOpenConfirmDelete(false);
         }}
       />
     </>

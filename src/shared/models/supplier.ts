@@ -1,33 +1,25 @@
-export interface SupplierDTO {
-  supplierId: number;
+export interface Suppliers {
+  id: number;
+  guid: string;
   name: string;
-  phone: string;
-  email: string;
   address: string;
-  createdDate: string;
-  updatedDate: string;
-  rating: null;
-  userId: number;
+  email: string;
+  phone: string;
+  isActive: string;
 }
 
-export interface CreateSupplierDTO {
+export interface CreateSupplierRequest {
   name: string;
-  phone: string;
-  email: string;
   address: string;
-  rating: number;
-  userId: number;
-  createdDate: string;
-  updatedDate: string;
+  email: string;
+  phone: string;
+  isActive: string;
 }
 
-export interface UpdateSupplierDTO {
+export interface UpdateSupplierRequest {
   name: string;
-  phone: string;
-  email: string;
   address: string;
-  rating: number;
-  userId: number;
-  createdDate: string;
-  updatedDate: string;
+  email: string;
+  phone: string;
+  isActive: string;
 }

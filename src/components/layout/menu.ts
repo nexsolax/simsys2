@@ -25,7 +25,7 @@ export const MENU_ITEMS = [
         text: 'User',
         icon: userIcon,
         child: [
-          { pathName: 'list', text: 'List user', icon: userIcon },
+          { pathName: 'list', text: 'List', icon: userIcon },
           { pathName: 'role', text: 'Role', icon: userIcon },
         ],
       },
@@ -36,7 +36,7 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
-            text: 'List product',
+            text: 'List',
             icon: productIcon,
           },
           {
@@ -60,7 +60,7 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
-            text: 'List purchase order',
+            text: 'List',
             icon: purchaseOrderIcon,
           },
           {
@@ -77,7 +77,7 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
-            text: 'List inventory',
+            text: 'List',
             icon: inventoryIcon,
           },
           {

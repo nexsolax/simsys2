@@ -29,6 +29,12 @@ import {
   CustomersActions,
   initialCustomers,
 } from './store/customers';
+import {
+  initialPurchaseOrders,
+  purchaseOrdersActions,
+  PurchaseOrdersActions,
+  PurchaseOrdersState,
+} from './store/purchase-orders';
 
 export interface State {
   categories: CategoriesState;
@@ -39,6 +45,7 @@ export interface State {
   consignments: ConsignmentsState;
   suppliers: SuppliersState;
   customers: CustomersState;
+  purchaseOrders: PurchaseOrdersState;
 }
 
 export type Actions = CategoriesActions &
@@ -48,7 +55,8 @@ export type Actions = CategoriesActions &
   ProductsActions &
   ConsignmentsActions &
   SuppliersActions &
-  CustomersActions;
+  CustomersActions &
+  PurchaseOrdersActions;
 
 export type Store = State & Actions;
 export type StoreGet = () => Store;
@@ -72,5 +80,7 @@ export const useStore = create<Store, [['zustand/immer', never]]>(
     ...suppliersActions(set),
     customers: initialCustomers,
     ...customersActions(set),
+    purchaseOrders: initialPurchaseOrders,
+    ...purchaseOrdersActions(set),
   })),
 );

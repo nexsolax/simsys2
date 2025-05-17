@@ -1,36 +1,27 @@
-export interface User {
-  userId: number;
+export interface Users {
+  id: number;
   username: string;
   email: string;
   contactInfo: string;
-  createdDate: string;
-  status: boolean;
-  roleId: number;
+  guid: string;
+  roleGuid: string;
+  active: boolean;
 }
 
-export interface UserDTO {
-  userId: number;
+export interface UserCreateRequest {
   username: string;
+  password: string;
   email: string;
   contactInfo: string;
-  createdDate: string;
-  status: boolean;
-  roleId: number;
+  isActive: boolean;
+  roleGuid: string;
 }
 
-export interface UserCreateDTO {
+export interface UserUpdateRequest {
   username: string;
+  password: string;
   email: string;
   contactInfo: string;
-  roleId: number;
-  status: boolean;
-  createdDate: string;
-}
-
-export interface UserUpdateDTO {
-  username: string;
-  email: string;
-  contactInfo: string;
-  roleId: number;
-  status: boolean;
+  isActive: boolean;
+  roleGuid: string;
 }

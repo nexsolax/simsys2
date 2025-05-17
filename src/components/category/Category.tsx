@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Box, Button, Grid2, IconButton, Paper } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
@@ -6,34 +6,29 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import ConfirmationDialog from '../confirmation/ConfirmationModal';
 import CreateCategoryDialog from './create/CreateCategory';
+import { Categories } from '../../shared/models/category';
+import { useStore } from '../../store';
 
 const Category: React.FC = () => {
+  const fetchAllCategories = useStore((state) => state.fetchAllCategories);
+  const deleteCategory = useStore((state) => state.deleteCategory);
+  const categoriesList = useStore((state) => state.categories.categoriesList);
+
   const [openCreateCategory, setOpenCreateCategory] = useState(false);
   const [openEditCategory, setOpenEditCategory] = useState(false);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
-  const [categoriesData, setCategoriesData] = useState<any[]>([
-    {
-      id: 1,
-      name: 'Áo thun tay ngắn',
-    },
-    {
-      id: 2,
-      name: 'Áo thun tay dài',
-    },
-    {
-      id: 3,
-      name: 'Áo thun thế thao',
-    },
-    {
-      id: 4,
-      name: 'Áo thun ba lỗ',
-    },
-    {
-      id: 5,
-      name: 'Áo thun sweater',
-    },
-  ]);
-  const [currentCategory, setCurrentCategory] = useState<any>(null);
+  const [categoriesData, setCategoriesData] = useState<Categories[]>([]);
+  const [currentCategory, setCurrentCategory] = useState<Categories>();
+
+  useEffect(() => {
+    fetchAllCategories();
+  }, []);
+
+  useEffect(() => {
+    if (categoriesList && categoriesList.length > 0) {
+      setCategoriesData(categoriesList);
+    }
+  }, [categoriesList]);
 
   const columnsCategory: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 80 },
@@ -41,6 +36,12 @@ const Category: React.FC = () => {
       field: 'name',
       headerName: 'Name',
       width: 80,
+      flex: 1,
+    },
+    {
+      field: 'description',
+      headerName: 'Description',
+      width: 120,
       flex: 1,
     },
     {
@@ -75,11 +76,6 @@ const Category: React.FC = () => {
   ];
 
   const paginationModel = { page: 0, pageSize: 5 };
-
-  const handleDeleteCategory = (id: number) => {
-    const newCategoriesData = categoriesData.filter((category) => category.id !== id);
-    setCategoriesData(newCategoriesData);
-  };
 
   return (
     <>
@@ -124,17 +120,7 @@ const Category: React.FC = () => {
         open={openCreateCategory}
         isEdit={openEditCategory}
         category={currentCategory}
-        onClose={(category) => {
-          if (category && category.id) {
-            if (openEditCategory) {
-              const index = categoriesData.findIndex((u) => u.id === category.id);
-              const newCategoriesData = [...categoriesData];
-              newCategoriesData[index] = category;
-              setCategoriesData(newCategoriesData);
-            } else {
-              setCategoriesData([...categoriesData, category]);
-            }
-          }
+        onClose={() => {
           setOpenEditCategory(false);
           setOpenCreateCategory(false);
         }}
@@ -147,7 +133,7 @@ const Category: React.FC = () => {
         type='warning'
         onClose={() => setConfirmDelete(false)}
         onConfirm={() => {
-          handleDeleteCategory(currentCategory.id);
+          deleteCategory(currentCategory!.id);
           setConfirmDelete(false);
         }}
       />

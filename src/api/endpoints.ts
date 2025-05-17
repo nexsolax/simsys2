@@ -2,9 +2,9 @@ const ENDPOINTS = {
   CATEGORIES: {
     GET_ALL: `/categories`,
     GET_ONE: (id: string) => `/categories/${id}`,
-    CREATE: `/categories/create`,
-    UPDATE: (id: string) => `/categories/update/${id}`,
-    DELETE: (id: string) => `/categories/delete/${id}`,
+    CREATE: `/categories`,
+    UPDATE: (id: string) => `/categories/${id}`,
+    DELETE: (id: string) => `/categories/${id}`,
   },
   VARIANT: {
     GET_ALL: `/variants`,
@@ -77,6 +77,13 @@ const ENDPOINTS = {
     CREATE: `/customers`,
     UPDATE: (id: string) => `/customers/${id}`,
     DELETE: (id: string) => `/customers/${id}`,
+  },
+  PURCHASE_ORDERS: {
+    GET_ALL: `/purchase-orders`,
+    GET_ONE: (id: string) => `/purchase-orders/${id}`,
+    CREATE: `/purchase-orders`,
+    UPDATE: (id: string) => `/purchase-orders/${id}`,
+    DELETE: (id: string) => `/purchase-orders/${id}`,
   },
 };
 export default ENDPOINTS;

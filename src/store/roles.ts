@@ -1,20 +1,21 @@
 import { StoreSet } from '../store';
 import api from '../api/axios';
 import ENDPOINTS from '../api/endpoints';
+import { Roles, RoleCreateRequest, RoleUpdateRequest } from '../shared/models/role';
 
 export interface RolesState {
-  rolesList: any | undefined;
+  rolesList: Roles[] | undefined;
 }
 
 export interface RolesActions {
   fetchAllRoles: () => Promise<void>;
-  createRole: (name: string, desc: string) => Promise<void>;
-  updateRole: (id: number, name: string, desc: string) => Promise<void>;
+  createRole: (role: RoleCreateRequest) => Promise<void>;
+  updateRole: (id: number, roleUpdated: RoleUpdateRequest) => Promise<void>;
   deleteRole: (id: number) => Promise<void>;
 }
 
 export const initialRoles: RolesState = {
-  rolesList: undefined,
+  rolesList: [],
 };
 
 export function rolesActions(set: StoreSet): RolesActions {
@@ -29,35 +30,16 @@ export function rolesActions(set: StoreSet): RolesActions {
         console.log(error);
       }
     },
-    createRole: async (name: string, desc: string) => {
+    createRole: async (role: RoleCreateRequest) => {
       try {
-        const body = {
-          roleName: name,
-          description: desc,
-        };
-        const response = await api.post(ENDPOINTS.ROLE.CREATE, body);
-        set((state) => {
-          state.roles.rolesList = [...state.roles.rolesList, response.data];
-        });
+        await api.post(ENDPOINTS.ROLE.CREATE, role);
       } catch (error: any) {
         console.log(error);
       }
     },
-    updateRole: async (id: number, name: string, desc: string) => {
+    updateRole: async (id: number, roleUpdated: RoleUpdateRequest) => {
       try {
-        const body = {
-          roleName: name,
-          description: desc,
-        };
-        await api.put(ENDPOINTS.ROLE.UPDATE(id.toString()), body);
-        set((state) => {
-          state.roles.rolesList = state.roles.rolesList.map((role: any) => {
-            if (role.roleId === id) {
-              return { ...role, roleId: id };
-            }
-            return role;
-          });
-        });
+        await api.put(ENDPOINTS.ROLE.UPDATE(id.toString()), roleUpdated);
       } catch (error: any) {
         console.log(error);
       }
@@ -66,7 +48,7 @@ export function rolesActions(set: StoreSet): RolesActions {
       try {
         await api.delete(ENDPOINTS.ROLE.DELETE(id.toString()));
         set((state) => {
-          state.roles.rolesList = state.roles.rolesList.filter((role: any) => role.roleId !== id);
+          state.roles.rolesList = state.roles.rolesList?.filter((role: Roles) => role.id !== id);
         });
       } catch (error: any) {
         console.log(error);

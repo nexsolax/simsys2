@@ -10,16 +10,17 @@ import {
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useStore } from '../../../store';
+import { RoleCreateRequest, Roles, RoleUpdateRequest } from '../../../shared/models/role';
 
 interface Props {
   open: boolean;
   isEdit?: boolean;
-  role?: any;
+  role?: Roles | null;
   onClose: () => void;
 }
 
 const CreateRoleDialog: React.FC<Props> = ({ open, isEdit, role, onClose }) => {
-  const [roleData, setRoleData] = useState<any>(null);
+  const [roleData, setRoleData] = useState<Roles | null>(null);
 
   const fetchAllRoles = useStore((state) => state.fetchAllRoles);
   const createRole = useStore((state) => state.createRole);
@@ -49,9 +50,17 @@ const CreateRoleDialog: React.FC<Props> = ({ open, isEdit, role, onClose }) => {
           validationSchema={validationSchema}
           onSubmit={async (values) => {
             if (!isEdit) {
-              await createRole(values.name, values.description);
+              const roleCreate: RoleCreateRequest = {
+                roleName: values.name,
+                description: values.description,
+              };
+              await createRole(roleCreate);
             } else {
-              await updateRole(roleData.roleId, values.name, values.description);
+              const roleUpdate: RoleUpdateRequest = {
+                roleName: values.name,
+                description: values.description,
+              };
+              await updateRole(roleData!.id, roleUpdate);
             }
             await fetchAllRoles();
             onClose();

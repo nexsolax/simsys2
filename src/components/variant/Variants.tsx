@@ -5,37 +5,34 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 
 import { useStore } from '../../store';
 import { pencilIcon, trashIcon } from '../../shared/icon/icon';
-import { Variant } from '../../shared/models/variant';
 import ConfirmationDialog from '../confirmation/ConfirmationModal';
 import CreateVariantDialog from './create/CreateVariantDialog';
+import { Variant } from '../../shared/models/variant';
 
 const Variants: React.FC = () => {
   const [openCreateVariant, setOpenCreateVariant] = useState(false);
   const [openEditVariant, setOpenEditVariant] = useState(false);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
-  const [currentVariant, setCurrentVariant] = useState<any>(null);
+  const [currentVariant, setCurrentVariant] = useState<Variant | null>(null);
   const [variantsData, setVariantsData] = useState<Variant[]>([]);
 
   const variantsList = useStore((state) => state.variants.variantsList);
-  const variantsValueList = useStore((state) => state.variants.variantsValueList);
   const fetchAllVariants = useStore((state) => state.fetchAllVariants);
-  const fetchAllVariantsValue = useStore((state) => state.fetchAllVariantsValue);
   const deleteVariant = useStore((state) => state.deleteVariant);
 
   const columnsVariant: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 80 },
     {
-      field: 'name',
-      headerName: 'Variant Name',
+      field: 'color',
+      headerName: 'Color',
       width: 200,
       flex: 1,
     },
     {
-      field: 'variantValues',
-      headerName: 'Values',
-      width: 300,
+      field: 'size',
+      headerName: 'Size',
+      width: 200,
       flex: 1,
-      renderCell: (params) => params.row.variantValues.map((val: any) => val.value).join(', '),
     },
     {
       field: 'functions',
@@ -72,28 +69,13 @@ const Variants: React.FC = () => {
 
   useEffect(() => {
     fetchAllVariants();
-    fetchAllVariantsValue();
   }, []);
 
   useEffect(() => {
-    if (variantsList && variantsValueList) {
-      const newVariantsData = variantsList.map((variant: any) => ({
-        ...variant,
-        id: variant.variantId,
-        variantValues: variantsValueList.reduce((acc: any, val: any) => {
-          if (val.variantId === variant.variantId) {
-            acc.push({
-              value: val.value,
-              variantValueId: val.variantValueId,
-              variantId: val.variantId,
-            });
-          }
-          return acc;
-        }, []),
-      }));
-      setVariantsData(newVariantsData);
+    if (variantsList) {
+      setVariantsData(variantsList);
     }
-  }, [variantsList, variantsValueList]);
+  }, [variantsList]);
 
   return (
     <>
@@ -132,7 +114,7 @@ const Variants: React.FC = () => {
       <CreateVariantDialog
         open={openCreateVariant}
         isEdit={openEditVariant}
-        variant={currentVariant}
+        variant={currentVariant!}
         onClose={() => {
           setOpenEditVariant(false);
           setOpenCreateVariant(false);
@@ -146,7 +128,9 @@ const Variants: React.FC = () => {
         type='warning'
         onClose={() => setConfirmDelete(false)}
         onConfirm={async () => {
-          await deleteVariant(currentVariant.id);
+          if (currentVariant) {
+            await deleteVariant(currentVariant.id);
+          }
           setConfirmDelete(false);
         }}
       />

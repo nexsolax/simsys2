@@ -1,17 +1,17 @@
 import { StoreSet } from '../store';
 import api from '../api/axios';
 import ENDPOINTS from '../api/endpoints';
-import { ProductDTO } from '../shared/models/product';
+import { CreateProductRequest, Products, UpdateProductRequest } from '../shared/models/product';
 
 export interface ProductsState {
-  productsList: any | undefined;
+  productsList: Products[] | undefined;
 }
 
 export interface ProductsActions {
   fetchAllProducts: () => Promise<void>;
-  fetchOneProduct: (id: string) => Promise<void>;
-  createProduct: (product: ProductDTO) => Promise<any>;
-  updateProduct: (product: ProductDTO, id: number) => Promise<void>;
+  fetchOneProduct: (id: number) => Promise<Products>;
+  createProduct: (product: CreateProductRequest) => Promise<any>;
+  updateProduct: (product: UpdateProductRequest, id: number) => Promise<void>;
   deleteProduct: (id: number) => Promise<void>;
 }
 
@@ -31,45 +31,36 @@ export function productsActions(set: StoreSet): ProductsActions {
         console.log(error);
       }
     },
-    fetchOneProduct: async (id: string) => {
+    fetchOneProduct: async (id: number) => {
       try {
-        const response = await api.get(`${ENDPOINTS.PRODUCT.GET_ONE}/${id}`);
-        set((state) => {
-          state.products.productsList = response.data;
-        });
+        const response = await api.get(ENDPOINTS.PRODUCT.GET_ONE(id.toString()));
+        return response.data;
       } catch (error: any) {
         console.log(error);
       }
     },
-    createProduct: async (product: ProductDTO) => {
+    createProduct: async (product: CreateProductRequest) => {
       try {
-        const response = await api.post(ENDPOINTS.PRODUCT.CREATE, product);
-        set((state) => {
-          state.products.productsList = response.data;
-        });
+        await api.post(ENDPOINTS.PRODUCT.CREATE, product);
       } catch (error: any) {
         console.log(error);
       }
     },
-    updateProduct: async (product: ProductDTO, id: number) => {
+    updateProduct: async (product: UpdateProductRequest, id: number) => {
       try {
-        const response = await api.put(`${ENDPOINTS.PRODUCT.UPDATE}/${id}`, product);
-        set((state) => {
-          state.products.productsList = response.data;
-        });
+        await api.put(ENDPOINTS.PRODUCT.UPDATE(id.toString()), product);
       } catch (error: any) {
         console.log(error);
       }
     },
     deleteProduct: async (id: number) => {
       try {
-        const response = await api.delete(`${ENDPOINTS.PRODUCT.DELETE}/${id}`);
+        await api.delete(ENDPOINTS.PRODUCT.DELETE(id.toString()));
         set((state) => {
-          state.products.productsList = state.products.productsList.filter(
-            (product: any) => product.productid !== id,
+          state.products.productsList = state.products.productsList?.filter(
+            (product: Products) => product.id !== id,
           );
         });
-        return response.data;
       } catch (error: any) {
         console.log(error);
       }

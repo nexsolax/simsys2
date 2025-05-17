@@ -60,21 +60,8 @@ const Customer: React.FC = () => {
       ),
     },
     { field: 'phone', headerName: 'Phone', width: 100, flex: 1 },
-    { field: 'address', headerName: 'Address', width: 100, flex: 1 },
-    { field: 'bankcard', headerName: 'Bank Card', width: 100, flex: 1 },
-    { field: 'createdDate', headerName: 'Created Date', width: 120 },
-    { field: 'updatedDate', headerName: 'Updated Date', width: 120 },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 80,
-      renderCell: (params) => (
-        <Chip
-          color={params.value ? 'success' : 'error'}
-          label={params.value ? 'Active' : 'Inactive'}
-        />
-      ),
-    },
+    { field: 'address', headerName: 'Address', width: 150, flex: 1 },
+    { field: 'bankCard', headerName: 'Bank Card', width: 150, flex: 1 },
     {
       field: 'functions',
       headerName: '',

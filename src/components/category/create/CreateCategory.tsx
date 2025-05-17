@@ -10,15 +10,26 @@ import {
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
+import {
+  Categories,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+} from '../../../shared/models/category';
+import { useStore } from '../../../store';
+
 interface Props {
   open: boolean;
   isEdit?: boolean;
-  category?: any;
-  onClose: (values: any) => void;
+  category?: Categories;
+  onClose: () => void;
 }
 
 const CreateCategoryDialog: React.FC<Props> = ({ open, isEdit, category, onClose }) => {
-  const [categoryData, setCategoryData] = useState<any>(null);
+  const fetchAllCategories = useStore((state) => state.fetchAllCategories);
+  const createCategory = useStore((state) => state.createCategory);
+  const updateCategory = useStore((state) => state.updateCategory);
+
+  const [categoryData, setCategoryData] = useState<Categories | null>(null);
 
   useEffect(() => {
     if (isEdit && category) {
@@ -30,6 +41,7 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, isEdit, category, onClose
 
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
+    description: Yup.string().required('Description is required'),
   });
 
   return (
@@ -39,23 +51,23 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, isEdit, category, onClose
         <Formik
           initialValues={{
             name: categoryData ? categoryData.name : '',
+            description: categoryData ? categoryData.description : '',
           }}
           validationSchema={validationSchema}
-          onSubmit={(values) => {
-            let categoryData;
+          onSubmit={async (values) => {
             if (!isEdit) {
-              categoryData = {
+              const newCategory: CreateCategoryRequest = {
                 ...values,
-                id: 10,
               };
+              await createCategory(newCategory);
             } else {
-              categoryData = {
+              const updatedCategory: UpdateCategoryRequest = {
                 ...values,
-                id: category.id,
               };
+              await updateCategory(updatedCategory, category!.id);
             }
-            console.log('Category Data:', categoryData);
-            onClose(categoryData);
+            await fetchAllCategories();
+            onClose();
           }}
         >
           {({ errors, touched, handleChange, handleSubmit, values }) => (
@@ -70,6 +82,17 @@ const CreateCategoryDialog: React.FC<Props> = ({ open, isEdit, category, onClose
                     onChange={handleChange}
                     error={touched.name && Boolean(errors.name)}
                     helperText={touched.name && errors.name}
+                  />
+                </Grid>
+                <Grid size={12}>
+                  <TextField
+                    fullWidth
+                    name='description'
+                    label='Description'
+                    value={values.description}
+                    onChange={handleChange}
+                    error={touched.description && Boolean(errors.description)}
+                    helperText={touched.description && errors.description}
                   />
                 </Grid>
               </Grid>
