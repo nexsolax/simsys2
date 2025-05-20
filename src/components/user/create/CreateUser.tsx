@@ -19,12 +19,13 @@ import * as Yup from 'yup';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 
 import { useStore } from '../../../store';
-import { UserCreateDTO, UserUpdateDTO } from '../../../shared/models/user';
+import { UserCreateRequest, Users, UserUpdateRequest } from '../../../shared/models/user';
+import { Roles } from '../../../shared/models/role';
 
 interface Props {
   open: boolean;
   isEdit?: boolean;
-  user?: any;
+  user?: Users | null;
   onClose: () => void;
 }
 
@@ -35,11 +36,11 @@ const CreateUserDialog: React.FC<Props> = ({ open, isEdit, user, onClose }) => {
   const updateUser = useStore((state) => state.updateUser);
 
   const [avatar, setAvatar] = useState(null);
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<Users | null>(null);
   useEffect(() => {
     if (isEdit && user) {
       setUserData(user);
-      setAvatar(user.avatar);
+      // setAvatar(user.avatar);
     } else {
       setUserData(null);
     }
@@ -70,24 +71,24 @@ const CreateUserDialog: React.FC<Props> = ({ open, isEdit, user, onClose }) => {
             username: userData ? userData.username : '',
             email: userData ? userData.email : '',
             contactInfo: userData ? userData.contactInfo : '',
-            roleId: userData ? userData.roleId : '',
+            password: '',
+            roleGuid: userData ? userData.roleGuid : '',
           }}
           validationSchema={validationSchema}
           onSubmit={async (values) => {
             if (!isEdit) {
-              const userCreate: UserCreateDTO = {
+              const userCreate: UserCreateRequest = {
                 ...values,
-                createdDate: new Date().toISOString().split('T')[0],
-                status: true,
+                isActive: true,
               };
               await createUser(userCreate);
             } else {
-              const userUpdate: UserUpdateDTO = {
+              const userUpdate: UserUpdateRequest = {
                 ...values,
-                status: userData.status,
+                isActive: true,
               };
               console.log(userUpdate);
-              await updateUser(userData.userId, userUpdate);
+              await updateUser(userData!.id, userUpdate);
             }
             await fetchAllUsers();
             setAvatar(null);
@@ -160,14 +161,14 @@ const CreateUserDialog: React.FC<Props> = ({ open, isEdit, user, onClose }) => {
                     <InputLabel>Role</InputLabel>
                     <Field
                       as={Select}
-                      name='roleId'
+                      name='roleGuid'
                       label='Role'
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      value={values.roleId}
+                      value={values.roleGuid}
                     >
-                      {roles.map((role: any, index: number) => (
-                        <MenuItem key={index} value={role.roleId}>
+                      {roles?.map((role: Roles, index: number) => (
+                        <MenuItem key={index} value={role.guid}>
                           {role.roleName}
                         </MenuItem>
                       ))}
@@ -177,7 +178,7 @@ const CreateUserDialog: React.FC<Props> = ({ open, isEdit, user, onClose }) => {
                       color='error'
                       sx={{ marginLeft: 2, marginTop: '4px' }}
                     >
-                      <ErrorMessage name='roleId' />
+                      <ErrorMessage name='roleGuid' />
                     </Typography>
                   </FormControl>
                 </Grid>

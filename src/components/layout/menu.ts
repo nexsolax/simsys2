@@ -9,6 +9,7 @@ import {
   productIcon,
   purchaseOrderIcon,
   supplierIcon,
+  transferRequestIcon,
   userIcon,
 } from '../../shared/icon/icon';
 
@@ -25,7 +26,7 @@ export const MENU_ITEMS = [
         text: 'User',
         icon: userIcon,
         child: [
-          { pathName: 'list', text: 'List', icon: userIcon },
+          { pathName: 'list', text: 'List of user', icon: userIcon },
           { pathName: 'role', text: 'Role', icon: userIcon },
         ],
       },
@@ -36,7 +37,7 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
-            text: 'List',
+            text: 'List of product',
             icon: productIcon,
           },
           {
@@ -60,7 +61,7 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
-            text: 'List',
+            text: 'List of Purchase Order',
             icon: purchaseOrderIcon,
           },
           {
@@ -77,13 +78,25 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
-            text: 'List',
+            text: 'List of Inventory',
             icon: inventoryIcon,
           },
           {
             pathName: 'location',
             text: 'Location',
             icon: locationIcon,
+          },
+        ],
+      },
+      {
+        pathName: 'transfer-request',
+        text: 'Transfer Request',
+        icon: transferRequestIcon,
+        child: [
+          {
+            pathName: 'list',
+            text: 'List of Transfer Request',
+            icon: transferRequestIcon,
           },
         ],
       },

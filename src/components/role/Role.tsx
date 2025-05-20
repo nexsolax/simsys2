@@ -7,6 +7,7 @@ import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import ConfirmationDialog from '../confirmation/ConfirmationModal';
 import CreateRoleDialog from './create/CreateRole';
 import { useStore } from '../../store';
+import { Roles } from '../../shared/models/role';
 
 const Role: React.FC = () => {
   const rolesList = useStore((state) => state.roles.rolesList);
@@ -16,16 +17,7 @@ const Role: React.FC = () => {
   const [openCreateRole, setOpenCreateRole] = useState(false);
   const [openEditRole, setOpenEditRole] = useState(false);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
-  const [rolesData, setRolesData] = useState<any[]>([
-    {
-      id: 1,
-      name: 'Staff',
-    },
-    {
-      id: 2,
-      name: 'Manager',
-    },
-  ]);
+  const [rolesData, setRolesData] = useState<Roles[]>([]);
   const [currentRole, setCurrentRole] = useState<any>(null);
 
   const columnsRole: GridColDef[] = [
@@ -33,7 +25,7 @@ const Role: React.FC = () => {
     {
       field: 'roleName',
       headerName: 'Name',
-      width: 80,
+      width: 60,
       flex: 1,
     },
     {
@@ -81,11 +73,7 @@ const Role: React.FC = () => {
 
   useEffect(() => {
     if (rolesList) {
-      const newRolesData = rolesList.map((role: any) => ({
-        ...role,
-        id: role.roleId,
-      }));
-      setRolesData(newRolesData);
+      setRolesData(rolesList);
     }
   }, [rolesList]);
 

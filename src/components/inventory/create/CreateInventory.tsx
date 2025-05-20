@@ -16,52 +16,27 @@ import {
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
+import {
+  CreateInventoryRequest,
+  Inventories,
+  UpdateInventoryRequest,
+} from '../../../shared/models/inventory';
+import { useStore } from '../../../store';
+
 interface Props {
   open: boolean;
   isEdit?: boolean;
   inventory?: any;
-  onClose: (values: any) => void;
+  onClose: () => void;
 }
 
 const CreateInventoryDialog: React.FC<Props> = ({ open, isEdit, inventory, onClose }) => {
-  const [inventoryData, setInventoryData] = useState<any>(null);
-  const locationsData = [
-    {
-      id: 1,
-      locationName: 'Kệ áo thun tai ngắn',
-      address: 'Kệ 1',
-      description: 'Kệ 1',
-      phoneNumber: '0909123123',
-    },
-    {
-      id: 2,
-      locationName: 'Kệ áo thun tay dài',
-      address: 'Kệ 2',
-      description: 'Kệ 2',
-      phoneNumber: '0909090909',
-    },
-    {
-      id: 3,
-      locationName: 'Kệ áo thun thể thao',
-      address: 'Kệ 3',
-      description: 'Kệ 3',
-      phoneNumber: '0908322323',
-    },
-    {
-      id: 4,
-      locationName: 'Kệ áo thun ba lỗ',
-      address: 'Kệ 4',
-      description: 'Kệ 4',
-      phoneNumber: '0909090909',
-    },
-    {
-      id: 5,
-      locationName: 'Kệ áo thun sweater',
-      address: 'Kệ 5',
-      description: 'Kệ 5',
-      phoneNumber: '0933333333',
-    },
-  ];
+  const [inventoryData, setInventoryData] = useState<Inventories | null>(null);
+
+  const fetchAllInventories = useStore((state) => state.fetchAllInventories);
+  const createInventory = useStore((state) => state.createInventory);
+  const updateInventory = useStore((state) => state.updateInventory);
+  const usersList = useStore((state) => state.users.usersList);
 
   useEffect(() => {
     if (isEdit && inventory) {
@@ -73,9 +48,9 @@ const CreateInventoryDialog: React.FC<Props> = ({ open, isEdit, inventory, onClo
 
   const validationSchema = Yup.object({
     name: Yup.string().required('Name is required'),
-    address: Yup.string().required('Address is required'),
     description: Yup.string().required('Description is required'),
-    locationId: Yup.number().required('Location is required'),
+    quantity: Yup.number().required('Quantity is required'),
+    userGuid: Yup.string().required('User is required'),
   });
 
   return (
@@ -85,26 +60,27 @@ const CreateInventoryDialog: React.FC<Props> = ({ open, isEdit, inventory, onClo
         <Formik
           initialValues={{
             name: inventoryData ? inventoryData.name : '',
-            address: inventoryData ? inventoryData.address : '',
             description: inventoryData ? inventoryData.description : '',
-            locationId: inventoryData ? inventoryData.locationId : '',
+            quantity: inventoryData ? inventoryData.quantity : '',
+            userGuid: inventoryData ? inventoryData.userGuid : '',
           }}
           validationSchema={validationSchema}
-          onSubmit={(values) => {
-            let inventoryData;
+          onSubmit={async (values) => {
             if (!isEdit) {
-              inventoryData = {
+              const newInventory: CreateInventoryRequest = {
                 ...values,
-                id: 10,
+                quantity: Number(values.quantity),
               };
+              await createInventory(newInventory);
             } else {
-              inventoryData = {
+              const updatedInventory: UpdateInventoryRequest = {
                 ...values,
-                id: inventory.id,
+                quantity: Number(values.quantity),
               };
+              await updateInventory(updatedInventory, inventoryData!.guid);
             }
-            console.log('Inventory Data:', inventoryData);
-            onClose(inventoryData);
+            fetchAllInventories();
+            onClose();
           }}
         >
           {({ errors, touched, handleChange, handleBlur, handleSubmit, values }) => (
@@ -124,17 +100,6 @@ const CreateInventoryDialog: React.FC<Props> = ({ open, isEdit, inventory, onClo
                 <Grid size={12}>
                   <TextField
                     fullWidth
-                    name='address'
-                    label='Address'
-                    value={values.address}
-                    onChange={handleChange}
-                    error={touched.address && Boolean(errors.address)}
-                    helperText={touched.address && errors.address}
-                  />
-                </Grid>
-                <Grid size={12}>
-                  <TextField
-                    fullWidth
                     name='description'
                     label='Description'
                     value={values.description}
@@ -144,19 +109,31 @@ const CreateInventoryDialog: React.FC<Props> = ({ open, isEdit, inventory, onClo
                   />
                 </Grid>
                 <Grid size={12}>
+                  <TextField
+                    fullWidth
+                    type='number'
+                    name='quantity'
+                    label='Quantity'
+                    value={values.quantity}
+                    onChange={handleChange}
+                    error={touched.quantity && Boolean(errors.quantity)}
+                    helperText={touched.quantity && errors.quantity}
+                  />
+                </Grid>
+                <Grid size={12}>
                   <FormControl fullWidth>
-                    <InputLabel>Location</InputLabel>
+                    <InputLabel>User</InputLabel>
                     <Field
                       as={Select}
-                      name='locationId'
-                      label='Location'
-                      value={values.locationId}
+                      name='userGuid'
+                      label='User'
+                      value={values.userGuid}
                       onChange={handleChange}
                       onBlur={handleBlur}
                     >
-                      {locationsData.map((location) => (
-                        <MenuItem key={location.id} value={location.id}>
-                          <ListItemText primary={location.locationName} />
+                      {usersList?.map((user) => (
+                        <MenuItem key={user.id} value={user.guid}>
+                          <ListItemText primary={user.username} />
                         </MenuItem>
                       ))}
                     </Field>
@@ -165,7 +142,7 @@ const CreateInventoryDialog: React.FC<Props> = ({ open, isEdit, inventory, onClo
                       color='error'
                       sx={{ marginLeft: 2, marginTop: '4px' }}
                     >
-                      <ErrorMessage name='locationId' />
+                      <ErrorMessage name='userGuid' />
                     </Typography>
                   </FormControl>
                 </Grid>

@@ -1,22 +1,26 @@
 import { StoreSet } from '../store';
 import api from '../api/axios';
 import ENDPOINTS from '../api/endpoints';
-import { ConsignmentDTO } from '../shared/models/consignment';
+import {
+  Consignments,
+  CreateConsignmentRequest,
+  UpdateConsignmentRequest,
+} from '../shared/models/consignment';
 
 export interface ConsignmentsState {
-  consignmentsList: any | undefined;
+  consignmentsList: Consignments[] | undefined;
 }
 
 export interface ConsignmentsActions {
   fetchAllConsignments: () => Promise<void>;
-  fetchOneConsignment: (id: string) => Promise<void>;
-  createConsignment: (consignment: ConsignmentDTO) => Promise<any>;
-  updateConsignment: (consignment: ConsignmentDTO, id: number) => Promise<void>;
-  deleteConsignment: (id: number) => Promise<void>;
+  fetchOneConsignment: (id: string) => Promise<Consignments>;
+  createConsignment: (consignment: CreateConsignmentRequest) => Promise<any>;
+  updateConsignment: (consignment: UpdateConsignmentRequest, id: string) => Promise<void>;
+  deleteConsignment: (id: string) => Promise<void>;
 }
 
 export const initialConsignments: ConsignmentsState = {
-  consignmentsList: undefined,
+  consignmentsList: [],
 };
 
 export function consignmentsActions(set: StoreSet): ConsignmentsActions {
@@ -33,43 +37,34 @@ export function consignmentsActions(set: StoreSet): ConsignmentsActions {
     },
     fetchOneConsignment: async (id: string) => {
       try {
-        const response = await api.get(`${ENDPOINTS.CONSIGNMENT.GET_ONE}/${id}`);
-        set((state) => {
-          state.consignments.consignmentsList = response.data;
-        });
+        const response = await api.get(ENDPOINTS.CONSIGNMENT.GET_ONE(id));
+        return response.data;
       } catch (error: any) {
         console.log(error);
       }
     },
-    createConsignment: async (consignment: ConsignmentDTO) => {
+    createConsignment: async (consignment: CreateConsignmentRequest) => {
       try {
-        const response = await api.post(ENDPOINTS.CONSIGNMENT.CREATE, consignment);
-        set((state) => {
-          state.consignments.consignmentsList = response.data;
-        });
+        await api.post(ENDPOINTS.CONSIGNMENT.CREATE, consignment);
       } catch (error: any) {
         console.log(error);
       }
     },
-    updateConsignment: async (consignment: ConsignmentDTO, id: number) => {
+    updateConsignment: async (consignment: UpdateConsignmentRequest, id: string) => {
       try {
-        const response = await api.put(`${ENDPOINTS.CONSIGNMENT.UPDATE}/${id}`, consignment);
-        set((state) => {
-          state.consignments.consignmentsList = response.data;
-        });
+        await api.put(ENDPOINTS.CONSIGNMENT.UPDATE(id), consignment);
       } catch (error: any) {
         console.log(error);
       }
     },
-    deleteConsignment: async (id: number) => {
+    deleteConsignment: async (id: string) => {
       try {
-        const response = await api.delete(`${ENDPOINTS.CONSIGNMENT.DELETE}/${id}`);
+        await api.delete(ENDPOINTS.CONSIGNMENT.DELETE(id));
         set((state) => {
-          state.consignments.consignmentsList = state.consignments.consignmentsList.filter(
-            (consignment: any) => consignment.id !== id,
+          state.consignments.consignmentsList = state.consignments.consignmentsList?.filter(
+            (consignment: Consignments) => consignment.guid !== id,
           );
         });
-        return response.data;
       } catch (error: any) {
         console.log(error);
       }

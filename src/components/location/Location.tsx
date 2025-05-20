@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { Box, Button, Grid2, IconButton, Paper } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
@@ -6,62 +6,38 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import ConfirmationDialog from '../confirmation/ConfirmationModal';
 import CreateLocationDialog from './create/CreateLocation';
+import { Locations } from '../../shared/models/location';
+import { useStore } from '../../store';
 
 const Location: React.FC = () => {
   const [openCreateLocation, setOpenCreateLocation] = useState(false);
   const [openEditLocation, setOpenEditLocation] = useState(false);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
-  const [locationsData, setLocationsData] = useState<any[]>([
-    {
-      id: 1,
-      locationName: 'Kệ áo thun tai ngắn',
-      address: 'Kệ 1',
-      description: 'Kệ 1',
-      phoneNumber: '0909123123',
-    },
-    {
-      id: 2,
-      locationName: 'Kệ áo thun tay dài',
-      address: 'Kệ 2',
-      description: 'Kệ 2',
-      phoneNumber: '0909090909',
-    },
-    {
-      id: 3,
-      locationName: 'Kệ áo thun thể thao',
-      address: 'Kệ 3',
-      description: 'Kệ 3',
-      phoneNumber: '0908322323',
-    },
-    {
-      id: 4,
-      locationName: 'Kệ áo thun ba lỗ',
-      address: 'Kệ 4',
-      description: 'Kệ 4',
-      phoneNumber: '0909090909',
-    },
-    {
-      id: 5,
-      locationName: 'Kệ áo thun sweater',
-      address: 'Kệ 5',
-      description: 'Kệ 5',
-      phoneNumber: '0933333333',
-    },
-  ]);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
+  const [locationsData, setLocationsData] = useState<Locations[]>([]);
+  const [currentLocation, setCurrentLocation] = useState<Locations | null>(null);
+
+  const fetchAllLocations = useStore((state) => state.fetchAllLocations);
+  const fetchAllInventories = useStore((state) => state.fetchAllInventories);
+  const deleteLocation = useStore((state) => state.deleteLocation);
+  const inventoriesList = useStore((state) => state.inventories.inventoriesList);
+  const locationsList = useStore((state) => state.locations.locationsList);
+  useEffect(() => {
+    fetchAllLocations();
+    fetchAllInventories();
+  }, []);
+
+  useEffect(() => {
+    if (locationsList) {
+      setLocationsData(locationsList);
+    }
+  }, [locationsList]);
 
   const columnsLocation: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 80 },
+    { field: 'guid', headerName: 'ID', width: 80 },
     {
       field: 'locationName',
       headerName: 'Name',
       width: 230,
-      flex: 1,
-    },
-    {
-      field: 'address',
-      headerName: 'Address',
-      width: 80,
       flex: 1,
     },
     {
@@ -71,10 +47,16 @@ const Location: React.FC = () => {
       flex: 1,
     },
     {
-      field: 'phoneNumber',
-      headerName: 'Phone Number',
+      field: 'inventoryGuid',
+      headerName: 'Inventory',
       width: 80,
       flex: 1,
+      renderCell: (params) => {
+        const inventory = inventoriesList?.find(
+          (inventory) => inventory.guid === params.row.inventoryGuid,
+        );
+        return inventory?.name;
+      },
     },
     {
       field: 'functions',
@@ -109,11 +91,6 @@ const Location: React.FC = () => {
 
   const paginationModel = { page: 0, pageSize: 5 };
 
-  const handleDeleteLocation = (id: number) => {
-    const newCategoriesData = locationsData.filter((location) => location.id !== id);
-    setLocationsData(newCategoriesData);
-  };
-
   return (
     <>
       <Button
@@ -140,7 +117,7 @@ const Location: React.FC = () => {
         <Grid2 size={12}>
           <Paper sx={{ p: 0 }}>
             <DataGrid
-              getRowId={(row) => row.id}
+              getRowId={(row) => row.guid}
               rows={locationsData}
               columns={columnsLocation}
               initialState={{ pagination: { paginationModel } }}
@@ -158,17 +135,7 @@ const Location: React.FC = () => {
         open={openCreateLocation}
         isEdit={openEditLocation}
         location={currentLocation}
-        onClose={(location) => {
-          if (location && location.id) {
-            if (openEditLocation) {
-              const index = locationsData.findIndex((u) => u.id === location.id);
-              const newCategoriesData = [...locationsData];
-              newCategoriesData[index] = location;
-              setLocationsData(newCategoriesData);
-            } else {
-              setLocationsData([...locationsData, location]);
-            }
-          }
+        onClose={() => {
           setOpenEditLocation(false);
           setOpenCreateLocation(false);
         }}
@@ -180,8 +147,8 @@ const Location: React.FC = () => {
         description='Are you sure you want to delete this location?'
         type='warning'
         onClose={() => setConfirmDelete(false)}
-        onConfirm={() => {
-          handleDeleteLocation(currentLocation.id);
+        onConfirm={async () => {
+          await deleteLocation(currentLocation!.guid);
           setConfirmDelete(false);
         }}
       />

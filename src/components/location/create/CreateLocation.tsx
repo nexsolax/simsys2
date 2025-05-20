@@ -6,19 +6,37 @@ import {
   TextField,
   Button,
   Grid2 as Grid,
+  FormControl,
+  Typography,
+  MenuItem,
+  ListItemText,
+  Select,
+  InputLabel,
 } from '@mui/material';
-import { Formik, Form } from 'formik';
+import { Formik, Form, ErrorMessage, Field } from 'formik';
 import * as Yup from 'yup';
+
+import {
+  CreateLocationRequest,
+  Locations,
+  UpdateLocationRequest,
+} from '../../../shared/models/location';
+import { useStore } from '../../../store';
 
 interface Props {
   open: boolean;
   isEdit?: boolean;
-  location?: any;
-  onClose: (values: any) => void;
+  location?: Locations | null;
+  onClose: () => void;
 }
 
 const CreateLocationDialog: React.FC<Props> = ({ open, isEdit, location, onClose }) => {
-  const [locationData, setLocationData] = useState<any>(null);
+  const [locationData, setLocationData] = useState<Locations | null>(null);
+
+  const inventoriesList = useStore((state) => state.inventories.inventoriesList);
+  const createLocation = useStore((state) => state.createLocation);
+  const updateLocation = useStore((state) => state.updateLocation);
+  const fetchAllLocations = useStore((state) => state.fetchAllLocations);
 
   useEffect(() => {
     if (isEdit && location) {
@@ -30,9 +48,8 @@ const CreateLocationDialog: React.FC<Props> = ({ open, isEdit, location, onClose
 
   const validationSchema = Yup.object({
     locationName: Yup.string().required('Name is required'),
-    address: Yup.string().required('Address is required'),
     description: Yup.string().required('Description is required'),
-    phoneNumber: Yup.string().required('Phone number is required'),
+    inventoryGuid: Yup.string().required('Inventory is required'),
   });
 
   return (
@@ -42,26 +59,24 @@ const CreateLocationDialog: React.FC<Props> = ({ open, isEdit, location, onClose
         <Formik
           initialValues={{
             locationName: locationData ? locationData.locationName : '',
-            address: locationData ? locationData.address : '',
             description: locationData ? locationData.description : '',
-            phoneNumber: locationData ? locationData.phoneNumber : '',
+            inventoryGuid: locationData ? locationData.inventoryGuid : '',
           }}
           validationSchema={validationSchema}
-          onSubmit={(values) => {
-            let locationData;
+          onSubmit={async (values) => {
             if (!isEdit) {
-              locationData = {
+              const newLocation: CreateLocationRequest = {
                 ...values,
-                id: 10,
               };
+              await createLocation(newLocation);
             } else {
-              locationData = {
+              const updatedLocation: UpdateLocationRequest = {
                 ...values,
-                id: location.id,
               };
+              await updateLocation(updatedLocation, locationData!.guid);
             }
-            console.log('Location Data:', locationData);
-            onClose(locationData);
+            fetchAllLocations();
+            onClose();
           }}
         >
           {({ errors, touched, handleChange, handleSubmit, values }) => (
@@ -81,17 +96,6 @@ const CreateLocationDialog: React.FC<Props> = ({ open, isEdit, location, onClose
                 <Grid size={12}>
                   <TextField
                     fullWidth
-                    name='address'
-                    label='Address'
-                    value={values.address}
-                    onChange={handleChange}
-                    error={touched.address && Boolean(errors.address)}
-                    helperText={touched.address && errors.address}
-                  />
-                </Grid>
-                <Grid size={12}>
-                  <TextField
-                    fullWidth
                     name='description'
                     label='Description'
                     value={values.description}
@@ -101,15 +105,29 @@ const CreateLocationDialog: React.FC<Props> = ({ open, isEdit, location, onClose
                   />
                 </Grid>
                 <Grid size={12}>
-                  <TextField
-                    fullWidth
-                    name='phoneNumber'
-                    label='Phone'
-                    value={values.phoneNumber}
-                    onChange={handleChange}
-                    error={touched.phoneNumber && Boolean(errors.phoneNumber)}
-                    helperText={touched.phoneNumber && errors.phoneNumber}
-                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Inventory</InputLabel>
+                    <Field
+                      as={Select}
+                      name='inventoryGuid'
+                      label='Inventory'
+                      value={values.inventoryGuid}
+                      onChange={handleChange}
+                    >
+                      {inventoriesList?.map((inventory) => (
+                        <MenuItem key={inventory.id} value={inventory.guid}>
+                          <ListItemText primary={inventory.name} />
+                        </MenuItem>
+                      ))}
+                    </Field>
+                    <Typography
+                      variant='caption'
+                      color='error'
+                      sx={{ marginLeft: 2, marginTop: '4px' }}
+                    >
+                      <ErrorMessage name='inventoryGuid' />
+                    </Typography>
+                  </FormControl>
                 </Grid>
               </Grid>
               <Grid container justifyContent='flex-end' mt={2}>

@@ -7,6 +7,8 @@ import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import CreateUserDialog from './create/CreateUser';
 import ConfirmationDialog from '../confirmation/ConfirmationModal';
 import { useStore } from '../../store';
+import { Users } from '../../shared/models/user';
+import { Roles } from '../../shared/models/role';
 
 const User: React.FC = () => {
   const usersList = useStore((state) => state.users.usersList);
@@ -18,10 +20,15 @@ const User: React.FC = () => {
   const [openCreateUser, setOpenCreateUser] = useState(false);
   const [openEditUser, setOpenEditUser] = useState(false);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
-  const [usersData, setUsersData] = useState<any[]>([]);
+  const [usersData, setUsersData] = useState<Users[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   const columnsUser: GridColDef[] = [
+    {
+      field: 'id',
+      headerName: 'ID',
+      width: 60,
+    },
     {
       field: 'username',
       headerName: 'Name',
@@ -53,14 +60,14 @@ const User: React.FC = () => {
     },
     { field: 'contactInfo', headerName: 'Contact Info', width: 300 },
     {
-      field: 'roleId',
+      field: 'roleGuid',
       headerName: 'Role',
       width: 100,
       renderCell: (params) =>
-        rolesList.find((role: any) => role.roleId === params.row.roleId)?.roleName || '',
+        rolesList?.find((role: Roles) => role.guid === params.row.roleGuid)?.roleName || '',
     },
     {
-      field: 'status',
+      field: 'active',
       headerName: 'Status',
       width: 120,
       renderCell: (params) => {
@@ -112,11 +119,7 @@ const User: React.FC = () => {
 
   useEffect(() => {
     if (usersList) {
-      const newUsersData = usersList.map((user) => ({
-        ...user,
-        id: user.userId,
-      }));
-      setUsersData(newUsersData);
+      setUsersData(usersList);
     }
   }, [usersList]);
 

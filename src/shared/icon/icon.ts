@@ -20,6 +20,8 @@ import uploadIcon from '../../assets/icons/ic-upload.svg';
 import uploadImageIcon from '../../assets/icons/upload-image.svg';
 import inventoryIcon from '../../assets/icons/ic-inventory.svg';
 import purchaseOrderIcon from '../../assets/icons/ic-purchase-order.svg';
+import transferRequestIcon from '../../assets/icons/ic-inventory.svg';
+import appLogo from '../../assets/images/warehouse-logo.svg';
 
 export {
   analyticsIcon,
@@ -44,4 +46,6 @@ export {
   uploadImageIcon,
   inventoryIcon,
   purchaseOrderIcon,
+  transferRequestIcon,
+  appLogo,
 };

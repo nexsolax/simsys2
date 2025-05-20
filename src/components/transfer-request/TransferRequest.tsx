@@ -5,47 +5,62 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 
 import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import ConfirmationDialog from '../confirmation/ConfirmationModal';
-import CreateInventoryDialog from './create/CreateInventory';
-import { Inventories } from '../../shared/models/inventory';
+import { TransferRequests } from '../../shared/models/transfer-request';
 import { useStore } from '../../store';
+import CreateTransferRequestDialog from './create/CreateTransferRequest';
 
-const Inventory: React.FC = () => {
-  const [openCreateInventory, setOpenCreateInventory] = useState(false);
-  const [openEditInventory, setOpenEditInventory] = useState(false);
+const TransferRequest: React.FC = () => {
+  const [openCreateTransferRequest, setOpenCreateTransferRequest] = useState(false);
+  const [openEditTransferRequest, setOpenEditTransferRequest] = useState(false);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
-  const [inventoriesData, setInventoriesData] = useState<Inventories[]>([]);
-  const [currentInventory, setCurrentInventory] = useState<any>(null);
+  const [transferRequestsData, setTransferRequestsData] = useState<TransferRequests[]>([]);
+  const [currentTransferRequest, setCurrentTransferRequest] = useState<TransferRequests | null>(
+    null,
+  );
 
-  const fetchAllInventories = useStore((state) => state.fetchAllInventories);
+  const fetchAllTransferRequests = useStore((state) => state.fetchAllTransferRequests);
   const fetchAllUsers = useStore((state) => state.fetchAllUsers);
-  const deleteInventory = useStore((state) => state.deleteInventory);
-  const inventoriesList = useStore((state) => state.inventories.inventoriesList);
+  const fetchAllProducts = useStore((state) => state.fetchAllProducts);
+  const deleteTransferRequest = useStore((state) => state.deleteTransferRequest);
+  const transferRequestsList = useStore((state) => state.transferRequests.transferRequestsList);
   const usersList = useStore((state) => state.users.usersList);
+  const productsList = useStore((state) => state.products.productsList);
 
   useEffect(() => {
-    fetchAllInventories();
+    fetchAllTransferRequests();
     fetchAllUsers();
+    fetchAllProducts();
   }, []);
 
   useEffect(() => {
-    if (inventoriesList) {
-      setInventoriesData(inventoriesList);
+    if (transferRequestsList) {
+      setTransferRequestsData(transferRequestsList);
     }
-  }, [inventoriesList]);
+  }, [transferRequestsList]);
 
-  const columnsInventory: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 80 },
+  const columnsTransferRequest: GridColDef[] = [
+    { field: 'guid', headerName: 'ID', width: 80 },
     {
-      field: 'name',
-      headerName: 'Name',
+      field: 'fromInventoryGuid',
+      headerName: 'From Inventory',
       width: 230,
       flex: 1,
     },
     {
-      field: 'description',
-      headerName: 'Description',
+      field: 'toInventoryGuid',
+      headerName: 'To Inventory',
       width: 80,
       flex: 1,
+    },
+    {
+      field: 'productGuid',
+      headerName: 'Product',
+      width: 80,
+      flex: 1,
+      renderCell: (params) => {
+        const product = productsList?.find((product) => product.guid === params.row.productGuid);
+        return product?.name;
+      },
     },
     {
       field: 'quantity',
@@ -56,11 +71,11 @@ const Inventory: React.FC = () => {
     {
       field: 'userGuid',
       headerName: 'User',
-      width: 120,
+      width: 80,
       flex: 1,
       renderCell: (params) => {
         const user = usersList?.find((user) => user.guid === params.row.userGuid);
-        return user ? user?.username : '';
+        return user?.username;
       },
     },
     {
@@ -73,9 +88,9 @@ const Inventory: React.FC = () => {
           <IconButton
             size='small'
             onClick={() => {
-              setOpenCreateInventory(true);
-              setOpenEditInventory(true);
-              setCurrentInventory(params.row);
+              setOpenCreateTransferRequest(true);
+              setOpenEditTransferRequest(true);
+              setCurrentTransferRequest(params.row);
             }}
           >
             <img width={18} height={18} src={pencilIcon} alt='' />
@@ -84,7 +99,7 @@ const Inventory: React.FC = () => {
             size='small'
             onClick={() => {
               setConfirmDelete(true);
-              setCurrentInventory(params.row);
+              setCurrentTransferRequest(params.row);
             }}
           >
             <img width={18} height={18} src={trashIcon} alt='' />
@@ -113,18 +128,18 @@ const Inventory: React.FC = () => {
         type='submit'
         variant='contained'
         fullWidth
-        onClick={() => setOpenCreateInventory(true)}
+        onClick={() => setOpenCreateTransferRequest(true)}
       >
-        <AddOutlinedIcon fontSize={'small'} /> New inventory
+        <AddOutlinedIcon fontSize={'small'} /> New transfer request
       </Button>
 
       <Grid2 container alignItems={'center'}>
         <Grid2 size={12}>
           <Paper sx={{ p: 0 }}>
             <DataGrid
-              getRowId={(row) => row.id}
-              rows={inventoriesData}
-              columns={columnsInventory}
+              getRowId={(row) => row.guid}
+              rows={transferRequestsData}
+              columns={columnsTransferRequest}
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
               checkboxSelection
@@ -136,24 +151,24 @@ const Inventory: React.FC = () => {
         </Grid2>
       </Grid2>
 
-      <CreateInventoryDialog
-        open={openCreateInventory}
-        isEdit={openEditInventory}
-        inventory={currentInventory}
+      <CreateTransferRequestDialog
+        open={openCreateTransferRequest}
+        isEdit={openEditTransferRequest}
+        transferRequest={currentTransferRequest}
         onClose={() => {
-          setOpenEditInventory(false);
-          setOpenCreateInventory(false);
+          setOpenEditTransferRequest(false);
+          setOpenCreateTransferRequest(false);
         }}
       />
 
       <ConfirmationDialog
         open={openConfirmDelete}
-        title='Delete inventory'
-        description='Are you sure you want to delete this inventory?'
+        title='Delete transfer request'
+        description='Are you sure you want to delete this transfer request?'
         type='warning'
         onClose={() => setConfirmDelete(false)}
         onConfirm={async () => {
-          await deleteInventory(currentInventory.guid);
+          await deleteTransferRequest(currentTransferRequest!.guid);
           setConfirmDelete(false);
         }}
       />
@@ -161,4 +176,4 @@ const Inventory: React.FC = () => {
   );
 };
 
-export default Inventory;
+export default TransferRequest;

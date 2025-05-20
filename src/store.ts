@@ -35,7 +35,30 @@ import {
   PurchaseOrdersActions,
   PurchaseOrdersState,
 } from './store/purchase-orders';
-
+import {
+  initialInventories,
+  InventoriesActions,
+  inventoriesActions,
+  InventoriesState,
+} from './store/inventories';
+import {
+  initialLocations,
+  locationsActions,
+  LocationsActions,
+  LocationsState,
+} from './store/locations';
+import {
+  initialTransferRequests,
+  transferRequestsActions,
+  TransferRequestsActions,
+  TransferRequestsState,
+} from './store/transfer-requests';
+import {
+  initialTransactions,
+  TransactionsActions,
+  transactionsActions,
+  TransactionsState,
+} from './store/transactions';
 export interface State {
   categories: CategoriesState;
   variants: VariantsState;
@@ -46,6 +69,10 @@ export interface State {
   suppliers: SuppliersState;
   customers: CustomersState;
   purchaseOrders: PurchaseOrdersState;
+  inventories: InventoriesState;
+  locations: LocationsState;
+  transferRequests: TransferRequestsState;
+  transactions: TransactionsState;
 }
 
 export type Actions = CategoriesActions &
@@ -56,7 +83,11 @@ export type Actions = CategoriesActions &
   ConsignmentsActions &
   SuppliersActions &
   CustomersActions &
-  PurchaseOrdersActions;
+  PurchaseOrdersActions &
+  InventoriesActions &
+  LocationsActions &
+  TransferRequestsActions &
+  TransactionsActions;
 
 export type Store = State & Actions;
 export type StoreGet = () => Store;
@@ -82,5 +113,13 @@ export const useStore = create<Store, [['zustand/immer', never]]>(
     ...customersActions(set),
     purchaseOrders: initialPurchaseOrders,
     ...purchaseOrdersActions(set),
+    inventories: initialInventories,
+    ...inventoriesActions(set),
+    locations: initialLocations,
+    ...locationsActions(set),
+    transferRequests: initialTransferRequests,
+    ...transferRequestsActions(set),
+    transactions: initialTransactions,
+    ...transactionsActions(set),
   })),
 );

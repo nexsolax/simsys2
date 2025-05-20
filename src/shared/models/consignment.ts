@@ -1,13 +1,32 @@
-export interface ConsignmentDTO {
+export interface Consignments {
   id: number;
+  guid: string;
   sku: string;
   name: string;
   description: string;
-  totalQuantity: number;
-  totalPrice: number;
-  importDate: string;
-  status: string;
-  supplierId: number;
-  userId: number;
-  productIds: number[];
+  price: number;
+  quantity: number;
+  createDate: Date;
+  supplierGuid: string;
+  purchaseOrderGuid: string;
+}
+
+export interface CreateConsignmentRequest {
+  sku: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  supplierGuid: string;
+  purchaseOrderGuid: string;
+}
+
+export interface UpdateConsignmentRequest {
+  sku: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  supplierGuid: string;
+  purchaseOrderGuid: string;
 }

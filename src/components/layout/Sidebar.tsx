@@ -11,6 +11,7 @@ import {
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 import { MENU_ITEMS } from './menu';
+import { appLogo } from '../../shared/icon/icon';
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Sidebar: React.FC = () => {
   return (
     <>
       <Toolbar style={{ paddingLeft: 28, paddingTop: 20, paddingBottom: 4 }}>
-        <img width={40} src='https://mui.com/static/logo.png' alt='app-logo' />
+        <img width={146} src={appLogo} alt='app-logo' />
       </Toolbar>
 
       {MENU_ITEMS.map((list, index) => (

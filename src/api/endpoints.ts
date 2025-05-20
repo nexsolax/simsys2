@@ -85,5 +85,33 @@ const ENDPOINTS = {
     UPDATE: (id: string) => `/purchase-orders/${id}`,
     DELETE: (id: string) => `/purchase-orders/${id}`,
   },
+  LOCATION: {
+    GET_ALL: `/locations`,
+    GET_ONE: (id: string) => `/locations/${id}`,
+    CREATE: `/locations`,
+    UPDATE: (id: string) => `/locations/${id}`,
+    DELETE: (id: string) => `/locations/${id}`,
+  },
+  INVENTORY: {
+    GET_ALL: `/inventories`,
+    GET_ONE: (id: string) => `/inventories/${id}`,
+    CREATE: `/inventories`,
+    UPDATE: (id: string) => `/inventories/${id}`,
+    DELETE: (id: string) => `/inventories/${id}`,
+  },
+  TRANSFER_REQUESTS: {
+    GET_ALL: `/transfer-requests`,
+    GET_ONE: (id: string) => `/transfer-requests/${id}`,
+    CREATE: `/transfer-requests`,
+    UPDATE: (id: string) => `/transfer-requests/${id}`,
+    DELETE: (id: string) => `/transfer-requests/${id}`,
+  },
+  TRANSACTION: {
+    GET_ALL: `/transactions`,
+    GET_ONE: (id: string) => `/transactions/${id}`,
+    CREATE: `/transactions`,
+    UPDATE: (id: string) => `/transactions/${id}`,
+    DELETE: (id: string) => `/transactions/${id}`,
+  },
 };
 export default ENDPOINTS;

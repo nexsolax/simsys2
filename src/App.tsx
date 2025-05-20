@@ -22,6 +22,7 @@ import Role from './components/role/Role';
 import Customer from './components/customer/Customer';
 
 import './App.css';
+import TransferRequest from './components/transfer-request/TransferRequest';
 
 const App: React.FC = () => {
   return (
@@ -49,6 +50,7 @@ const App: React.FC = () => {
               <Route path='purchase-order/request' element={<RequestPurchaseOrder />} />
               <Route path='inventory/list' element={<Inventory />} />
               <Route path='inventory/location' element={<Location />} />
+              <Route path='transfer-request/list' element={<TransferRequest />} />
               <Route
                 path='analytics'
                 element={
