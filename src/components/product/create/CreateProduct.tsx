@@ -25,6 +25,7 @@ import * as Yup from 'yup';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { useDropzone } from 'react-dropzone';
 import CloseIcon from '@mui/icons-material/Close';
+import { toast } from 'react-toastify';
 
 import { uploadIcon, uploadImageIcon } from '../../../shared/icon/icon';
 import { useStore } from '../../../store';
@@ -35,6 +36,7 @@ import {
 } from '../../../shared/models/product';
 import { Categories } from '../../../shared/models/category';
 import { Variant } from '../../../shared/models/variant';
+import { Consignments } from '../../../shared/models/consignment';
 
 interface Props {
   open: boolean;
@@ -47,6 +49,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
   // const sizeOptions = ['7', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12', '13'];
   // const tags = ['Education', 'Food and Beverage', 'Home and Garden', 'Sports', 'Entertainment'];
   const [images, setImages] = useState<{ file: File; preview: string }[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [productData, setProductData] = useState<Products | null>(null);
 
   const fetchAllProducts = useStore((state) => state.fetchAllProducts);
@@ -54,6 +57,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
   const updateProduct = useStore((state) => state.updateProduct);
   const categoriesList = useStore((state) => state.categories.categoriesList);
   const variantsList = useStore((state) => state.variants.variantsList);
+  const consignmentsList = useStore((state) => state.consignments.consignmentsList);
 
   useEffect(() => {
     if (product) {
@@ -61,12 +65,57 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
     }
   }, [product]);
 
-  const onDrop = (acceptedFiles: File[]) => {
+  const onDrop = async (acceptedFiles: File[]) => {
     const newImages = acceptedFiles.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
     }));
     setImages((prev) => [...prev, ...newImages]);
+  };
+
+  const handleUploadImages = async () => {
+    const files = images.map((image) => image.file);
+    const uploadImage = async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'blnhfbwk');
+
+      try {
+        const response = await fetch(`https://api.cloudinary.com/v1_1/dzclrmcf5/image/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+        return data.secure_url;
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        return null;
+      }
+    };
+
+    const uploadPromises = files.map(uploadImage);
+    const urls = await Promise.all(uploadPromises);
+    setUploadedImages(urls);
+    if (urls.length > 0) {
+      toast.success('Images uploaded successfully', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } else {
+      toast.error('Failed to upload images', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    }
+    console.log(urls);
   };
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -92,6 +141,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
     description: Yup.string().required('Description is required'),
     variantGuid: Yup.string().required('Variant is required'),
     categoryGuid: Yup.string().required('Category is required'),
+    consignmentGuid: Yup.string().required('Consignment is required'),
     // price: Yup.number().required('Price is required').positive('Price must be positive'),
     // productSKU: Yup.string().required('Product SKU is required'),
     // size: Yup.array().min(1, 'Select at least one size'),
@@ -103,19 +153,25 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
     if (!isEdit) {
       const newProduct: CreateProductRequest = {
         ...values,
-        status: 'Active',
+        images: uploadedImages[0] || '',
       };
       await createProduct(newProduct);
     } else {
       const updatedProduct: UpdateProductRequest = {
         ...values,
-        status: 'Active',
+        images: uploadedImages[0] || '',
       };
       await updateProduct(updatedProduct, productData!.id);
     }
     await fetchAllProducts();
     resetForm();
+    closeModal();
+  };
+
+  const closeModal = () => {
     onClose();
+    setImages([]);
+    setUploadedImages([]);
   };
 
   return (
@@ -129,6 +185,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
           status: product?.status || '',
           categoryGuid: product?.categoryGuid || '',
           variantGuid: product?.variantGuid || '',
+          consignmentGuid: product?.consignmentGuid || '',
         }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
@@ -212,6 +269,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values.categoryGuid}
+                    error={!!values.categoryGuid && Boolean(errors.categoryGuid)}
                   >
                     {categoriesList?.map((category: Categories) => (
                       <MenuItem key={category.id} value={category.guid}>
@@ -237,6 +295,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
                     onChange={handleChange}
                     onBlur={handleBlur}
                     value={values.variantGuid}
+                    error={!!values.variantGuid && Boolean(errors.variantGuid)}
                   >
                     {variantsList?.map((variant: Variant) => (
                       <MenuItem key={variant.id} value={variant.guid}>
@@ -253,6 +312,32 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
                   </Typography>
                 </FormControl>
 
+                <FormControl fullWidth>
+                  <InputLabel>Consignment</InputLabel>
+                  <Field
+                    as={Select}
+                    name='consignmentGuid'
+                    label='Consignment'
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.consignmentGuid}
+                    error={!!values.consignmentGuid && Boolean(errors.consignmentGuid)}
+                  >
+                    {consignmentsList?.map((consignment: Consignments) => (
+                      <MenuItem key={consignment.id} value={consignment.guid}>
+                        {consignment.name}
+                      </MenuItem>
+                    ))}
+                  </Field>
+
+                  <Typography
+                    variant='caption'
+                    color='error'
+                    sx={{ marginLeft: 2, marginTop: '4px' }}
+                  >
+                    <ErrorMessage name='consignmentGuid' />
+                  </Typography>
+                </FormControl>
                 {/* <Field
                   as={TextField}
                   label='Product SKU'
@@ -473,6 +558,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
                             padding: '6px 12px',
                             gap: '4px',
                           }}
+                          onClick={handleUploadImages}
                         >
                           <img width={16} src={uploadIcon} alt='' /> Upload
                         </Button>
@@ -489,7 +575,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
                   bg: 'var(--palette-common-white)',
                   borderColor: 'transparent',
                 }}
-                onClick={onClose}
+                onClick={closeModal}
                 variant='outlined'
               >
                 Cancel
@@ -499,7 +585,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
                 type='submit'
                 variant='contained'
               >
-                Create
+                {isEdit ? 'Update' : 'Create'}
               </Button>
             </DialogActions>
           </Form>

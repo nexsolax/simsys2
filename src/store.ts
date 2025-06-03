@@ -59,7 +59,11 @@ import {
   transactionsActions,
   TransactionsState,
 } from './store/transactions';
+import { AuthActions, authActions, AuthState, initialAuth } from './store/auth';
+import { initialOrders, ordersActions, OrdersActions, OrdersState } from './store/orders';
+
 export interface State {
+  auth: AuthState;
   categories: CategoriesState;
   variants: VariantsState;
   roles: RolesState;
@@ -73,9 +77,11 @@ export interface State {
   locations: LocationsState;
   transferRequests: TransferRequestsState;
   transactions: TransactionsState;
+  orders: OrdersState;
 }
 
-export type Actions = CategoriesActions &
+export type Actions = AuthActions &
+  CategoriesActions &
   VariantsActions &
   RolesActions &
   UsersActions &
@@ -87,7 +93,8 @@ export type Actions = CategoriesActions &
   InventoriesActions &
   LocationsActions &
   TransferRequestsActions &
-  TransactionsActions;
+  TransactionsActions &
+  OrdersActions;
 
 export type Store = State & Actions;
 export type StoreGet = () => Store;
@@ -95,6 +102,8 @@ export type StoreSet = (f: (state: Draft<State>) => void) => void;
 
 export const useStore = create<Store, [['zustand/immer', never]]>(
   immer((set, get) => ({
+    auth: initialAuth,
+    ...authActions(set, get),
     categories: initialCategories,
     ...categoriesActions(set),
     variants: initialVariants,
@@ -121,5 +130,7 @@ export const useStore = create<Store, [['zustand/immer', never]]>(
     ...transferRequestsActions(set),
     transactions: initialTransactions,
     ...transactionsActions(set),
+    orders: initialOrders,
+    ...ordersActions(set),
   })),
 );

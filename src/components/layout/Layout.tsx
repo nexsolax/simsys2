@@ -1,23 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Avatar,
   Box,
   Breadcrumbs,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Drawer,
   IconButton,
   InputAdornment,
+  Menu,
+  MenuItem,
   Stack,
   TextField,
   Toolbar,
   Typography,
 } from '@mui/material';
 import Link from '@mui/material/Link';
+import { ToastContainer } from 'react-toastify';
 
 import Sidebar from './Sidebar';
 import { notificationIcon, searchIcon, settingIcon } from '../../shared/icon/icon';
 import { MENU_ITEMS } from './menu';
+import { useStore } from '../../store';
 
 const drawerWidth = 240;
 
@@ -25,9 +34,12 @@ const Layout: React.FC = () => {
   const location = useLocation();
   const currentPathName = location.pathname.split('/').pop() || 'Overview';
   const [isOpenSetting, setIsOpenSetting] = useState(false);
-
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const [isHideBreadcrumbs, setIsHideBreadcrumbs] = useState(false);
-
+  const navigate = useNavigate();
+  const logout = useStore((state) => state.logout);
+  const user = useStore((state) => state.auth.user);
   useEffect(() => {
     const currentPathName = location.pathname.split('/').pop() || 'Overview';
     const managementItem = MENU_ITEMS.find((item) => item.title === 'Management');
@@ -122,11 +134,56 @@ const Layout: React.FC = () => {
                 <IconButton onClick={() => setIsOpenSetting(true)}>
                   <img width={24} height={24} src={settingIcon} alt='' />
                 </IconButton>
-                <Avatar
-                  sx={{ ml: 1, width: 40, height: 40 }}
-                  alt='User'
-                  src='https://assets.minimals.cc/public/assets/images/mock/avatar/avatar-25.webp'
-                />
+                <Box>
+                  <IconButton onClick={(e: any) => setAnchorEl(e.currentTarget)}>
+                    <Avatar
+                      sx={{ ml: 1, width: 40, height: 40 }}
+                      alt='User'
+                      src='https://assets.minimals.cc/public/assets/images/mock/avatar/avatar-25.webp'
+                    />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={() => setAnchorEl(null)}
+                  >
+                    <MenuItem>
+                      <Typography>Username: {user?.username}</Typography>
+                    </MenuItem>
+                    <MenuItem>
+                      <Typography>Email: {user?.gmail}</Typography>
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        setAnchorEl(null);
+                        setOpenLogoutDialog(true);
+                      }}
+                    >
+                      Logout
+                    </MenuItem>
+                  </Menu>
+
+                  <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
+                    <DialogTitle>Confirm Logout</DialogTitle>
+                    <DialogContent>
+                      <Typography>Are you sure you want to logout?</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={() => setOpenLogoutDialog(false)}>Cancel</Button>
+                      <Button
+                        onClick={() => {
+                          setOpenLogoutDialog(false);
+                          logout();
+                          navigate('/login');
+                        }}
+                        variant='contained'
+                        color='primary'
+                      >
+                        Logout
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                </Box>
               </Box>
             </Box>
           </Toolbar>
@@ -226,6 +283,7 @@ const Layout: React.FC = () => {
           <Outlet />
         </Box>
       </Box>
+      <ToastContainer />
     </Box>
   );
 };

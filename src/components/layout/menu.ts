@@ -53,7 +53,8 @@ export const MENU_ITEMS = [
         ],
       },
       { pathName: 'order', text: 'Order', icon: orderIcon },
-      { pathName: 'invoice', text: 'Invoice', icon: invoiceIcon },
+      // { pathName: 'invoice', text: 'Invoice', icon: invoiceIcon },
+      { pathName: 'consignment', text: 'Consignment', icon: invoiceIcon },
       {
         pathName: 'purchase-order',
         text: 'Purchase Order',
@@ -108,8 +109,8 @@ export const MENU_ITEMS = [
       },
     ],
   },
-  {
-    title: 'Reports',
-    items: [{ pathName: 'analytics', text: 'Analytics', icon: analyticsIcon }],
-  },
+  // {
+  //   title: 'Reports',
+  //   items: [{ pathName: 'analytics', text: 'Analytics', icon: analyticsIcon }],
+  // },
 ];

@@ -12,6 +12,8 @@ export interface Products {
   variantGuid: string;
   category: Categories;
   variant: Variant;
+  images: string;
+  consignmentGuid: string;
 }
 
 export interface CreateProductRequest {
@@ -21,6 +23,8 @@ export interface CreateProductRequest {
   status: string;
   categoryGuid: string;
   variantGuid: string;
+  image: string;
+  consignmentGuid: string;
 }
 
 export interface UpdateProductRequest {
@@ -30,4 +34,5 @@ export interface UpdateProductRequest {
   status: string;
   categoryGuid: string;
   variantGuid: string;
+  consignmentGuid: string;
 }

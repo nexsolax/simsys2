@@ -17,17 +17,10 @@ const Supplier: React.FC = () => {
   const [openCreateSupplier, setOpenCreateSupplier] = useState(false);
   const [openEditSupplier, setOpenEditSupplier] = useState(false);
   const [openConfirmDelete, setConfirmDelete] = useState(false);
-  const [suppliersData, setSuppliersData] = useState<Suppliers[]>([]);
 
   useEffect(() => {
     fetchAllSuppliers();
   }, []);
-
-  useEffect(() => {
-    if (suppliersList && suppliersList.length > 0) {
-      setSuppliersData(suppliersList);
-    }
-  }, [suppliersList]);
 
   const [currentSupplier, setCurrentSupplier] = useState<Suppliers>();
 
@@ -151,7 +144,7 @@ const Supplier: React.FC = () => {
         <Grid2 size={12}>
           <Paper sx={{ p: 0 }}>
             <DataGrid
-              rows={suppliersData}
+              rows={suppliersList}
               columns={columnsSupplier}
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}

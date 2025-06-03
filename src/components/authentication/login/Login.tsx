@@ -3,24 +3,22 @@ import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Button, Typography, Box, Grid2 } from '@mui/material';
-
-import useAuthStore from '../../../store/authStore';
+import { useStore } from '../../../store';
 
 const Login: React.FC = () => {
-  const setAccessToken = useAuthStore((state) => state.setAccessToken);
+  const login = useStore((state) => state.login);
+  const error = useStore((state) => state.auth.error);
   const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: Yup.object({
-      email: Yup.string().email('Invalid email').required('Required'),
+      email: Yup.string().required('Required'),
       password: Yup.string().min(6, 'Too short').required('Required'),
     }),
-    onSubmit: (values) => {
-      console.log('Form submitted', values);
-      const fakeToken = 'mockAccessToken123';
-      setAccessToken(fakeToken);
-      navigate('/dashboard/overview');
+    onSubmit: async (values) => {
+      const result = await login(values.email, values.password);
+      if (result === 'LOGIN_SUCCESS') navigate('/dashboard/overview');
     },
   });
 
@@ -63,6 +61,13 @@ const Login: React.FC = () => {
                 error={formik.touched.password && Boolean(formik.errors.password)}
                 helperText={formik.touched.password && formik.errors.password}
               />
+
+              {error && (
+                <Typography sx={{ color: 'red' }} variant='body2'>
+                  {error}
+                </Typography>
+              )}
+
               <Button
                 sx={{
                   display: 'flex',

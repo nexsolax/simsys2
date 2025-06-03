@@ -28,7 +28,8 @@ const ENDPOINTS = {
     DELETE: (id: string) => `/roles/${id}`,
   },
   AUTH: {
-    LOGIN: `/auth/login`,
+    LOGIN: (username: string, password: string) =>
+      `/auth/login?username=${username}&password=${password}`,
     REGISTER: `/auth/register`,
     REFRESH_TOKEN: `/auth/refresh`,
     LOGOUT: `/auth/logout`,
@@ -84,6 +85,13 @@ const ENDPOINTS = {
     CREATE: `/purchase-orders`,
     UPDATE: (id: string) => `/purchase-orders/${id}`,
     DELETE: (id: string) => `/purchase-orders/${id}`,
+  },
+  ORDER: {
+    GET_ALL: `/orders`,
+    GET_ONE: (id: string) => `/orders/${id}`,
+    CREATE: `/orders`,
+    UPDATE: (id: string) => `/orders/${id}`,
+    DELETE: (id: string) => `/orders/${id}`,
   },
   LOCATION: {
     GET_ALL: `/locations`,

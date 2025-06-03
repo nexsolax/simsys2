@@ -59,7 +59,10 @@ const Product: React.FC = () => {
         <Box sx={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <img
             style={{ width: 50, height: 50, borderRadius: '8px' }}
-            src={'https://api-dev-minimal-v630.pages.dev/assets/images/m-product/product-1.webp'}
+            src={
+              params.row.images ||
+              'https://api-dev-minimal-v630.pages.dev/assets/images/m-product/product-1.webp'
+            }
             alt={params.row.name}
           />
 

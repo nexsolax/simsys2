@@ -4,6 +4,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 
 import theme from './theme';
 import Login from './components/authentication/login/Login';
+import ProtectedRoute from './components/authentication/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import Overview from './components/overview/Overview';
 import Product from './components/product/Product';
@@ -20,9 +21,10 @@ import RequestPurchaseOrder from './components/request-purchase-order/RequestPur
 import PurchaseOrder from './components/purchase-order/PurchaseOrder';
 import Role from './components/role/Role';
 import Customer from './components/customer/Customer';
+import TransferRequest from './components/transfer-request/TransferRequest';
+import Consignment from './components/consignment/Consignment';
 
 import './App.css';
-import TransferRequest from './components/transfer-request/TransferRequest';
 
 const App: React.FC = () => {
   return (
@@ -31,7 +33,13 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           {/* Protected Layout */}
-          <Route element={<Layout />}>
+          <Route
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
             <Route path='/dashboard'>
               <Route index element={<Navigate to='overview' />} />
               <Route path='overview' element={<Overview />} />
@@ -44,6 +52,7 @@ const App: React.FC = () => {
               <Route path='user/role' element={<Role />} />
               <Route path='order' element={<Order />} />
               <Route path='invoice' element={<Invoice />} />
+              <Route path='consignment' element={<Consignment />} />
               <Route path='supplier' element={<Supplier />} />
               <Route path='customer' element={<Customer />} />
               <Route path='purchase-order/list' element={<PurchaseOrder />} />
