@@ -21,6 +21,7 @@ import {
   CreatePurchaseOrderDetailRequest,
   CreatePurchaseOrderRequest,
   PurchaseOrders,
+  UpdatePurchaseOrderRequest,
 } from '../../../shared/models/purchase-order';
 import { Suppliers } from '../../../shared/models/supplier';
 import { Products } from '../../../shared/models/product';
@@ -36,6 +37,7 @@ const CreatePurchaseOrderDialog: React.FC<Props> = ({ open, isEdit, purchaseOrde
   const fetchAllPurchaseOrders = useStore((state) => state.fetchAllPurchaseOrders);
   const fetchAllProducts = useStore((state) => state.fetchAllProducts);
   const createPurchaseOrder = useStore((state) => state.createPurchaseOrder);
+  const updatePurchaseOrder = useStore((state) => state.updatePurchaseOrder);
   const suppliersList = useStore((state) => state.suppliers.suppliersList);
   const productsList = useStore((state) => state.products.productsList);
 
@@ -51,11 +53,12 @@ const CreatePurchaseOrderDialog: React.FC<Props> = ({ open, isEdit, purchaseOrde
   useEffect(() => {
     if (isEdit && purchaseOrder) {
       setPurchaseOrderData(purchaseOrder);
+      setPurchaseOrderDetails(purchaseOrder?.purchaseOrderDetails || []);
     } else {
       setPurchaseOrderDetails([]);
       setPurchaseOrderData(null);
     }
-  }, [isEdit, purchaseOrder]);
+  }, [open, isEdit, purchaseOrder]);
 
   const handleAddProduct = () => {
     setPurchaseOrderDetails([...purchaseOrderDetails, { productGuid: '', quantity: 0 }]);
@@ -81,6 +84,7 @@ const CreatePurchaseOrderDialog: React.FC<Props> = ({ open, isEdit, purchaseOrde
             totalPrice: purchaseOrderData ? purchaseOrderData.totalPrice : '',
             supplierGuid: purchaseOrderData ? purchaseOrderData.supplierGuid : '',
             purchaseOrderDetails: purchaseOrderData ? purchaseOrderData.purchaseOrderDetails : [],
+            status: purchaseOrderData ? purchaseOrderData.isActive : 'inactive',
           }}
           validationSchema={validationSchema}
           onSubmit={async (values) => {
@@ -88,10 +92,18 @@ const CreatePurchaseOrderDialog: React.FC<Props> = ({ open, isEdit, purchaseOrde
               const purchaseOrderCreate: CreatePurchaseOrderRequest = {
                 ...values,
                 totalPrice: Number(values.totalPrice),
-                isActive: 'in process',
+                isActive: 'inactive',
                 purchaseOrderDetails: purchaseOrderDetails,
               };
               await createPurchaseOrder(purchaseOrderCreate);
+            } else {
+              const purchaseOrderUpdate: UpdatePurchaseOrderRequest = {
+                ...values,
+                totalPrice: Number(values.totalPrice),
+                isActive: values.status,
+                purchaseOrderDetails: purchaseOrderDetails,
+              };
+              await updatePurchaseOrder(purchaseOrderUpdate, purchaseOrderData!.guid);
             }
             await fetchAllPurchaseOrders();
             onClose();
@@ -148,6 +160,34 @@ const CreatePurchaseOrderDialog: React.FC<Props> = ({ open, isEdit, purchaseOrde
                     </Typography>
                   </FormControl>
                 </Grid>
+                {isEdit && (
+                  <Grid size={12}>
+                    <FormControl fullWidth>
+                      <InputLabel>Status</InputLabel>
+                      <Field
+                        as={Select}
+                        name='status'
+                        label='Status'
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={values.status}
+                      >
+                        {['inactive', 'active'].map((status: string, index: number) => (
+                          <MenuItem key={index} value={status}>
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </MenuItem>
+                        ))}
+                      </Field>
+                      <Typography
+                        variant='caption'
+                        color='error'
+                        sx={{ marginLeft: 2, marginTop: '4px' }}
+                      >
+                        <ErrorMessage name='supplierGuid' />
+                      </Typography>
+                    </FormControl>
+                  </Grid>
+                )}
                 <Grid size={12}>
                   <Box
                     sx={{

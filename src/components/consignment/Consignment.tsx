@@ -55,7 +55,8 @@ const Consignment: React.FC = () => {
       ),
     },
     { field: 'sku', headerName: 'SKU', width: 100, flex: 1 },
-    { field: 'price', headerName: 'Price', width: 150, flex: 1 },
+    { field: 'payPrice', headerName: 'Pay Price', width: 150, flex: 1 },
+    { field: 'totalPrice', headerName: 'Total Price', width: 150, flex: 1 },
     { field: 'quantity', headerName: 'Quantity', width: 150, flex: 1 },
     {
       field: 'supplier',
@@ -185,7 +186,7 @@ const Consignment: React.FC = () => {
         type='warning'
         onClose={() => setConfirmDelete(false)}
         onConfirm={async () => {
-          await deleteConsignment(currentConsignment.id);
+          await deleteConsignment(currentConsignment.guid);
           await fetchAllConsignments();
           setConfirmDelete(false);
         }}

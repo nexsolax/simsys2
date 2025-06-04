@@ -66,19 +66,19 @@ const User: React.FC = () => {
       renderCell: (params) =>
         rolesList?.find((role: Roles) => role.guid === params.row.roleGuid)?.roleName || '',
     },
-    {
-      field: 'active',
-      headerName: 'Status',
-      width: 120,
-      renderCell: (params) => {
-        return (
-          <Chip
-            color={params.value ? 'success' : 'error'}
-            label={params.value ? 'Active' : 'Inactive'}
-          />
-        );
-      },
-    },
+    // {
+    //   field: 'active',
+    //   headerName: 'Status',
+    //   width: 120,
+    //   renderCell: (params) => {
+    //     return (
+    //       <Chip
+    //         color={params.value ? 'success' : 'error'}
+    //         label={params.value ? 'Active' : 'Inactive'}
+    //       />
+    //     );
+    //   },
+    // },
     {
       field: 'functions',
       headerName: '',

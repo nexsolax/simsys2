@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Chip,
@@ -18,10 +18,34 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import CheckIcon from '@mui/icons-material/Check';
 import CircleIcon from '@mui/icons-material/Circle';
+import { useParams } from 'react-router-dom';
 
 import EmblaCarousel from '../../carousel/EmblaCarousel';
+import { useStore } from '../../../store';
+import { Products } from '../../../shared/models/product';
+import { Consignments } from '../../../shared/models/consignment';
 
 const ProductDetail: React.FC = () => {
+  const { id } = useParams();
+  const fetchProductDetail = useStore((state) => state.fetchOneProduct);
+  const fetchConsignmentDetail = useStore((state) => state.fetchOneConsignment);
+  const addToCart = useStore((state) => state.addToCart);
+
+  const [productDetail, setProductDetail] = useState<Products | null>(null);
+  const [consignmentDetail, setConsignmentDetail] = useState<Consignments | null>(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const product = await fetchProductDetail(Number(id));
+      const consignment = await fetchConsignmentDetail(product?.consignmentGuid);
+      setProductDetail(product);
+      setConsignmentDetail(consignment);
+    };
+    if (id) {
+      fetchProduct();
+    }
+  }, []);
+
   const OPTIONS = {};
   const SLIDE_COUNT = 10;
   const SLIDES = [
@@ -34,15 +58,15 @@ const ProductDetail: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState('blue');
 
-  const handleSizeChange = (event) => {
+  const handleSizeChange = (event: any) => {
     setSize(event.target.value);
   };
 
-  const handleQuantityChange = (type) => {
+  const handleQuantityChange = (type: any) => {
     setQuantity((prev) => (type === 'increase' ? prev + 1 : Math.max(prev - 1, 1)));
   };
 
-  const handleColorSelect = (color) => {
+  const handleColorSelect = (color: any) => {
     setSelectedColor(color);
   };
 
@@ -50,23 +74,31 @@ const ProductDetail: React.FC = () => {
     <Container maxWidth='lg'>
       <Grid2 container alignItems={'center'} spacing={6}>
         <Grid2 size={6}>
-          <EmblaCarousel slides={SLIDES} options={OPTIONS}></EmblaCarousel>
+          <EmblaCarousel
+            slides={productDetail?.image ? [productDetail?.image] : SLIDES}
+            options={OPTIONS}
+          ></EmblaCarousel>
         </Grid2>
         <Grid2 py={4} alignSelf='flex-start' size={6}>
           <Box
             sx={{ display: 'flex', flexDirection: 'column', gap: '18px', alignItems: 'flex-start' }}
           >
             <Chip label='NEW' color='info'></Chip>
-            <Typography fontWeight={700} variant='caption' color='success'>
-              IN STOCK
-            </Typography>
+            {productDetail?.quantity && productDetail?.quantity > 0 ? (
+              <Typography fontWeight={700} variant='caption' color='success'>
+                IN STOCK
+              </Typography>
+            ) : (
+              <Typography fontWeight={700} variant='caption' color='error'>
+                OUT OF STOCK
+              </Typography>
+            )}
             <Typography fontWeight={700} variant='h5'>
-              Classic Leather Loafers
+              {productDetail?.name}
             </Typography>
-            <Typography variant='h4'>$97.14</Typography>
+            {consignmentDetail && <Typography variant='h4'>{consignmentDetail?.price}</Typography>}
             <Typography variant='body2' sx={{ color: 'var(--palette-text-secondary)' }}>
-              Featuring the original ripple design inspired by Japanese bullet trains, the Nike Air
-              Max 97 lets you push your style full-speed ahead.
+              {productDetail?.description}
             </Typography>
             <Divider
               sx={{ m: 0, borderColor: 'var(--palette-grey-200)' }}
@@ -85,21 +117,23 @@ const ProductDetail: React.FC = () => {
                 Color
               </Typography>
               <Box display='flex' gap={1}>
-                {['blue', 'pink'].map((color) => (
-                  <Badge
-                    key={color}
-                    overlap='circular'
-                    badgeContent={
-                      selectedColor === color ? <CheckIcon sx={{ color: 'white' }} /> : null
-                    }
-                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                    className='badge-color-selected'
+                <Badge
+                  overlap='circular'
+                  badgeContent={
+                    selectedColor === productDetail?.variant.color ? (
+                      <CheckIcon sx={{ color: 'white' }} />
+                    ) : null
+                  }
+                  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  className='badge-color-selected'
+                >
+                  <IconButton
+                    onClick={() => handleColorSelect(productDetail?.variant.color)}
+                    sx={{ bgcolor: productDetail?.variant.color }}
                   >
-                    <IconButton onClick={() => handleColorSelect(color)} sx={{ bgcolor: color }}>
-                      <CircleIcon sx={{ color: color }} />
-                    </IconButton>
-                  </Badge>
-                ))}
+                    <CircleIcon sx={{ color: productDetail?.variant.color }} />
+                  </IconButton>
+                </Badge>
               </Box>
             </Box>
 
@@ -114,13 +148,16 @@ const ProductDetail: React.FC = () => {
               <Typography variant='h6' gutterBottom>
                 Size
               </Typography>
-              <Select value={size} onChange={handleSizeChange} sx={{ width: 80 }}>
+              <Typography variant='h6' color='textSecondary' mt={1}>
+                {productDetail?.variant.size}
+              </Typography>
+              {/* <Select value={size} onChange={handleSizeChange} sx={{ width: 80 }}>
                 {[7, 8, 9, 10, 11].map((size) => (
                   <MenuItem key={size} value={size}>
                     {size}
                   </MenuItem>
                 ))}
-              </Select>
+              </Select> */}
             </Box>
 
             <Box
@@ -174,7 +211,7 @@ const ProductDetail: React.FC = () => {
                   </IconButton>
                 </ButtonGroup>
                 <Typography variant='body2' color='textSecondary' mt={1}>
-                  Available: 72
+                  Available: {productDetail?.quantity}
                 </Typography>
               </Box>
             </Box>
@@ -189,11 +226,10 @@ const ProductDetail: React.FC = () => {
                 color='warning'
                 startIcon={<ShoppingCartIcon />}
                 sx={{ flex: 1 }}
+                onClick={() => addToCart(productDetail!, quantity, productDetail?.price || 0)}
+                disabled={productDetail?.quantity === 0}
               >
                 Add to cart
-              </Button>
-              <Button variant='contained' color='primary' sx={{ flex: 1, bgcolor: '#333' }}>
-                Buy now
               </Button>
             </Box>
           </Box>

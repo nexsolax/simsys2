@@ -126,6 +126,7 @@ const PurchaseOrder: React.FC = () => {
             <IconButton
               size='small'
               onClick={() => {
+                setOpenCreatePurchaseOrder(true);
                 setOpenEditPurchaseOrder(true);
                 setCurrentPurchaseOrder(params.row);
               }}
@@ -190,7 +191,10 @@ const PurchaseOrder: React.FC = () => {
         open={openCreatePurchaseOrder}
         isEdit={openEditPurchaseOrder}
         purchaseOrder={currentPurchaseOrder}
-        onClose={() => setOpenCreatePurchaseOrder(false)}
+        onClose={() => {
+          setOpenCreatePurchaseOrder(false);
+          setOpenEditPurchaseOrder(false);
+        }}
       />
 
       <ConfirmationDialog

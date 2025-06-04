@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Avatar,
+  Badge,
   Box,
   Breadcrumbs,
   Button,
@@ -24,9 +25,10 @@ import Link from '@mui/material/Link';
 import { ToastContainer } from 'react-toastify';
 
 import Sidebar from './Sidebar';
-import { notificationIcon, searchIcon, settingIcon } from '../../shared/icon/icon';
+import { cartIcon, notificationIcon, searchIcon, settingIcon } from '../../shared/icon/icon';
 import { MENU_ITEMS } from './menu';
 import { useStore } from '../../store';
+import Cart from '../cart/Cart';
 
 const drawerWidth = 240;
 
@@ -36,24 +38,11 @@ const Layout: React.FC = () => {
   const [isOpenSetting, setIsOpenSetting] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
-  const [isHideBreadcrumbs, setIsHideBreadcrumbs] = useState(false);
   const navigate = useNavigate();
   const logout = useStore((state) => state.logout);
   const user = useStore((state) => state.auth.user);
-  useEffect(() => {
-    const currentPathName = location.pathname.split('/').pop() || 'Overview';
-    const managementItem = MENU_ITEMS.find((item) => item.title === 'Management');
-    if (managementItem && currentPathName) {
-      const managementPathName = managementItem.items.map((item) => item.pathName);
-      if (managementPathName.includes(currentPathName)) {
-        setIsHideBreadcrumbs(true);
-      } else {
-        setIsHideBreadcrumbs(false);
-      }
-    } else {
-      setIsHideBreadcrumbs(false);
-    }
-  }, [location]);
+  const [isShowCart, setIsShowCart] = useState(false);
+  const cartItems = useStore((state) => state.cart.cart);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -134,6 +123,11 @@ const Layout: React.FC = () => {
                 <IconButton onClick={() => setIsOpenSetting(true)}>
                   <img width={24} height={24} src={settingIcon} alt='' />
                 </IconButton>
+                <IconButton onClick={() => setIsShowCart(!isShowCart)}>
+                  <Badge badgeContent={cartItems?.length} color='warning'>
+                    <img width={24} height={24} src={cartIcon} alt='' />
+                  </Badge>
+                </IconButton>
                 <Box>
                   <IconButton onClick={(e: any) => setAnchorEl(e.currentTarget)}>
                     <Avatar
@@ -147,12 +141,16 @@ const Layout: React.FC = () => {
                     open={Boolean(anchorEl)}
                     onClose={() => setAnchorEl(null)}
                   >
-                    <MenuItem>
-                      <Typography>Username: {user?.username}</Typography>
+                    <MenuItem
+                      sx={{
+                        fontSize: '12px',
+                        color: 'var(--palette-text-secondary)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {user?.role}
                     </MenuItem>
-                    <MenuItem>
-                      <Typography>Email: {user?.gmail}</Typography>
-                    </MenuItem>
+                    <MenuItem onClick={() => navigate('/dashboard/profile')}>Profile</MenuItem>
                     <MenuItem
                       onClick={() => {
                         setAnchorEl(null);
@@ -252,37 +250,41 @@ const Layout: React.FC = () => {
                 : ''}
             </Typography>
 
-            {isHideBreadcrumbs && (
+            {location.pathname.length > 0 && (
               <Breadcrumbs
-                sx={{ fontSize: '13px', fontWeight: 500, color: 'var(--palette-text-primary)' }}
+                sx={{
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: 'var(--palette-text-primary)',
+                  textTransform: 'capitalize',
+                }}
                 separator='•'
                 aria-label='breadcrumb'
               >
-                <Link underline='hover' color='inherit' href='/dashboard'>
-                  Dashboard
-                </Link>
-                <Link
-                  underline='hover'
-                  color='inherit'
-                  href='/material-ui/getting-started/installation/'
-                >
-                  {currentPathName
-                    ? currentPathName[0].toLocaleUpperCase() + currentPathName.slice(1)
-                    : ''}
-                </Link>
-                <Typography
-                  fontSize={'13px'}
-                  fontWeight={500}
-                  sx={{ color: 'var(--palette-text-secondary)' }}
-                >
-                  List
+                <Typography fontSize={'13px'} fontWeight={500}>
+                  {location.pathname.split('/')[1]}
                 </Typography>
+                {location.pathname.split('/')[2] && (
+                  <Typography fontSize={'13px'} fontWeight={500}>
+                    {location.pathname.split('/')[2]}
+                  </Typography>
+                )}
+                {location.pathname.split('/')[3] && (
+                  <Typography
+                    fontSize={'13px'}
+                    fontWeight={500}
+                    sx={{ color: 'var(--palette-text-secondary)' }}
+                  >
+                    {location.pathname.split('/')[3]}
+                  </Typography>
+                )}
               </Breadcrumbs>
             )}
           </Stack>
           <Outlet />
         </Box>
       </Box>
+      {isShowCart && <Cart />}
       <ToastContainer />
     </Box>
   );

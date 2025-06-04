@@ -72,19 +72,19 @@ const Supplier: React.FC = () => {
     //     );
     //   },
     // },
-    {
-      field: 'isActive',
-      headerName: 'Status',
-      width: 120,
-      renderCell: (params) => {
-        return (
-          <Chip
-            color={params.value === 'Active' ? 'success' : 'error'}
-            label={params.value === 'Active' ? 'Active' : 'Inactive'}
-          />
-        );
-      },
-    },
+    // {
+    //   field: 'isActive',
+    //   headerName: 'Status',
+    //   width: 120,
+    //   renderCell: (params) => {
+    //     return (
+    //       <Chip
+    //         color={params.value === 'Active' ? 'success' : 'error'}
+    //         label={params.value === 'Active' ? 'Active' : 'Inactive'}
+    //       />
+    //     );
+    //   },
+    // },
     {
       field: 'functions',
       headerName: '',

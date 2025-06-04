@@ -53,6 +53,7 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
   const [productData, setProductData] = useState<Products | null>(null);
 
   const fetchAllProducts = useStore((state) => state.fetchAllProducts);
+  const fetchAllConsignments = useStore((state) => state.fetchAllConsignments);
   const createProduct = useStore((state) => state.createProduct);
   const updateProduct = useStore((state) => state.updateProduct);
   const categoriesList = useStore((state) => state.categories.categoriesList);
@@ -60,10 +61,18 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
   const consignmentsList = useStore((state) => state.consignments.consignmentsList);
 
   useEffect(() => {
-    if (product) {
+    if (isEdit && product) {
       setProductData(product);
+    } else {
+      setProductData(null);
     }
-  }, [product]);
+  }, [isEdit, product]);
+
+  useEffect(() => {
+    fetchAllConsignments();
+  }, []);
+
+  console.log(productData);
 
   const onDrop = async (acceptedFiles: File[]) => {
     const newImages = acceptedFiles.map((file) => ({
@@ -141,7 +150,8 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
     description: Yup.string().required('Description is required'),
     variantGuid: Yup.string().required('Variant is required'),
     categoryGuid: Yup.string().required('Category is required'),
-    consignmentGuid: Yup.string().required('Consignment is required'),
+    consignmentGuid: Yup.string().nullable().optional(),
+    price: Yup.number().required('Price is required').positive('Price must be positive'),
     // price: Yup.number().required('Price is required').positive('Price must be positive'),
     // productSKU: Yup.string().required('Product SKU is required'),
     // size: Yup.array().min(1, 'Select at least one size'),
@@ -153,13 +163,14 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
     if (!isEdit) {
       const newProduct: CreateProductRequest = {
         ...values,
-        images: uploadedImages[0] || '',
+        status: 0,
+        image: uploadedImages[0] || '',
       };
       await createProduct(newProduct);
     } else {
       const updatedProduct: UpdateProductRequest = {
         ...values,
-        images: uploadedImages[0] || '',
+        image: uploadedImages[0] || '',
       };
       await updateProduct(updatedProduct, productData!.id);
     }
@@ -176,16 +187,17 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'>
-      <DialogTitle>Create Product</DialogTitle>
+      <DialogTitle>{isEdit ? 'Edit Product' : 'Create Product'}</DialogTitle>
       <Formik
         initialValues={{
-          name: product?.name || '',
-          quantity: product?.quantity || '',
-          description: product?.description || '',
-          status: product?.status || '',
-          categoryGuid: product?.categoryGuid || '',
-          variantGuid: product?.variantGuid || '',
-          consignmentGuid: product?.consignmentGuid || '',
+          name: productData?.name || '',
+          quantity: productData?.quantity || '',
+          description: productData?.description || '',
+          status: productData?.status || '',
+          categoryGuid: productData?.categoryGuid || '',
+          variantGuid: productData?.variantGuid || '',
+          consignmentGuid: productData?.consignmentGuid || '',
+          price: productData?.price || '',
         }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
@@ -311,6 +323,19 @@ const CreateProductDialog: React.FC<Props> = ({ open, isEdit, product, onClose }
                     <ErrorMessage name='category' />
                   </Typography>
                 </FormControl>
+
+                <Field
+                  as={TextField}
+                  label='Price'
+                  name='price'
+                  type='number'
+                  fullWidth
+                  variant='outlined'
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.price}
+                  error={!!values.price && Boolean(errors.price)}
+                />
 
                 <FormControl fullWidth>
                   <InputLabel>Consignment</InputLabel>

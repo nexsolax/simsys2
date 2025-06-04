@@ -6,8 +6,13 @@ import {
   TextField,
   Button,
   Grid2 as Grid,
+  InputLabel,
+  Select,
+  Typography,
+  MenuItem,
+  FormControl,
 } from '@mui/material';
-import { Formik, Form } from 'formik';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
 import { useStore } from '../../../store';
@@ -16,6 +21,7 @@ import {
   UpdateConsignmentRequest,
 } from '../../../shared/models/consignment';
 import { Consignments } from '../../../shared/models/consignment';
+import { PurchaseOrders } from '../../../shared/models/purchase-order';
 
 interface Props {
   open: boolean;
@@ -45,7 +51,7 @@ const CreateConsignmentDialog: React.FC<Props> = ({ open, isEdit, consignment, o
     name: Yup.string().required('Name is required'),
     sku: Yup.string().required('SKU is required'),
     description: Yup.string().required('Description is required'),
-    price: Yup.number().required('Price is required'),
+    payPrice: Yup.number().required('Price is required'),
     quantity: Yup.number().required('Quantity is required'),
     supplierGuid: Yup.string().required('Supplier is required'),
     purchaseOrderGuid: Yup.string().required('Purchase order is required'),
@@ -60,7 +66,7 @@ const CreateConsignmentDialog: React.FC<Props> = ({ open, isEdit, consignment, o
             name: consignmentData ? consignmentData.name : '',
             sku: consignmentData ? consignmentData.sku : '',
             description: consignmentData ? consignmentData.description : '',
-            price: consignmentData ? consignmentData.price : '',
+            payPrice: consignmentData ? consignmentData.payPrice : '',
             quantity: consignmentData ? consignmentData.quantity : '',
             supplierGuid: consignmentData ? consignmentData.supplierGuid : '',
             purchaseOrderGuid: consignmentData ? consignmentData.purchaseOrderGuid : '',
@@ -76,13 +82,13 @@ const CreateConsignmentDialog: React.FC<Props> = ({ open, isEdit, consignment, o
               const updatedConsignment: UpdateConsignmentRequest = {
                 ...values,
               };
-              await updateConsignment(updatedConsignment, consignmentData.id);
+              await updateConsignment(updatedConsignment, consignmentData.guid);
             }
             await fetchAllConsignments();
             onClose();
           }}
         >
-          {({ errors, touched, handleChange, handleSubmit, values }) => (
+          {({ errors, touched, handleChange, handleSubmit, values, handleBlur }) => (
             <Form onSubmit={handleSubmit}>
               <Grid container spacing={3} mt={3}>
                 <Grid size={6}>
@@ -121,12 +127,12 @@ const CreateConsignmentDialog: React.FC<Props> = ({ open, isEdit, consignment, o
                 <Grid size={6}>
                   <TextField
                     fullWidth
-                    name='price'
-                    label='Price'
-                    value={values.price}
+                    name='payPrice'
+                    label='Pay Price'
+                    value={values.payPrice}
                     onChange={handleChange}
-                    error={touched.price && Boolean(errors.price)}
-                    helperText={touched.price && errors.price}
+                    error={touched.payPrice && Boolean(errors.payPrice)}
+                    helperText={touched.payPrice && errors.payPrice}
                   />
                 </Grid>
                 <Grid size={12}>
@@ -141,46 +147,58 @@ const CreateConsignmentDialog: React.FC<Props> = ({ open, isEdit, consignment, o
                   />
                 </Grid>
                 <Grid size={12}>
-                  <TextField
-                    fullWidth
-                    name='supplierGuid'
-                    label='Supplier'
-                    value={values.supplierGuid}
-                    onChange={handleChange}
-                    error={touched.supplierGuid && Boolean(errors.supplierGuid)}
-                    helperText={touched.supplierGuid && errors.supplierGuid}
-                    select
-                    SelectProps={{
-                      native: true,
-                    }}
+                  <FormControl fullWidth>
+                    <InputLabel>Supplier</InputLabel>
+                    <Field
+                      as={Select}
+                      name='supplierGuid'
+                      label='Supplier'
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.supplierGuid}
+                      error={!!values.supplierGuid && Boolean(errors.supplierGuid)}
+                    >
+                      {suppliersList?.map((supplier) => (
+                        <MenuItem key={supplier.guid} value={supplier.guid}>
+                          {supplier.name}
+                        </MenuItem>
+                      ))}
+                    </Field>
+                  </FormControl>
+                  <Typography
+                    variant='caption'
+                    color='error'
+                    sx={{ marginLeft: 2, marginTop: '4px' }}
                   >
-                    {suppliersList?.map((supplier) => (
-                      <option key={supplier.guid} value={supplier.guid}>
-                        {supplier.name}
-                      </option>
-                    ))}
-                  </TextField>
+                    <ErrorMessage name='supplierGuid' />
+                  </Typography>
                 </Grid>
                 <Grid size={12}>
-                  <TextField
-                    fullWidth
-                    name='purchaseOrderGuid'
-                    label='Purchase Order'
-                    value={values.purchaseOrderGuid}
-                    onChange={handleChange}
-                    error={touched.purchaseOrderGuid && Boolean(errors.purchaseOrderGuid)}
-                    helperText={touched.purchaseOrderGuid && errors.purchaseOrderGuid}
-                    select
-                    SelectProps={{
-                      native: true,
-                    }}
-                  >
-                    {purchaseOrdersList?.map((purchaseOrder) => (
-                      <option key={purchaseOrder.guid} value={purchaseOrder.guid}>
-                        {purchaseOrder.description}
-                      </option>
-                    ))}
-                  </TextField>
+                  <FormControl fullWidth>
+                    <InputLabel>Purchase Order</InputLabel>
+                    <Field
+                      as={Select}
+                      name='purchaseOrderGuid'
+                      label='Purchase Order'
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      value={values.purchaseOrderGuid}
+                      error={!!values.purchaseOrderGuid && Boolean(errors.purchaseOrderGuid)}
+                    >
+                      {purchaseOrdersList?.map((purchaseOrder: PurchaseOrders) => (
+                        <MenuItem key={purchaseOrder.guid} value={purchaseOrder.guid}>
+                          {purchaseOrder.description}
+                        </MenuItem>
+                      ))}
+                    </Field>
+                    <Typography
+                      variant='caption'
+                      color='error'
+                      sx={{ marginLeft: 2, marginTop: '4px' }}
+                    >
+                      <ErrorMessage name='purchaseOrderGuid' />
+                    </Typography>
+                  </FormControl>
                 </Grid>
               </Grid>
               <Grid container justifyContent='flex-end' mt={2}>

@@ -65,11 +65,11 @@ export const MENU_ITEMS = [
             text: 'List',
             icon: purchaseOrderIcon,
           },
-          {
-            pathName: 'request',
-            text: 'Request',
-            icon: purchaseOrderIcon,
-          },
+          // {
+          //   pathName: 'request',
+          //   text: 'Request',
+          //   icon: purchaseOrderIcon,
+          // },
         ],
       },
       {

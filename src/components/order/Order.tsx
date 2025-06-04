@@ -3,26 +3,21 @@ import { DataGrid, GridColDef, GridToolbar } from '@mui/x-data-grid';
 import { Avatar, Box, Chip, Grid2, IconButton, Paper, Typography } from '@mui/material';
 import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import { useStore } from '../../store';
-import { Orders } from '../../shared/models/order';
+import { OrderDetail, Orders } from '../../shared/models/order';
 
 const Order: React.FC = () => {
   const fetchAllOrders = useStore((state) => state.fetchAllOrders);
   const fetchAllCustomers = useStore((state) => state.fetchAllCustomers);
+  const fetchAllProducts = useStore((state) => state.fetchAllProducts);
   const ordersList = useStore((state) => state.orders.ordersList);
   const customersList = useStore((state) => state.customers.customersList);
-
-  const [ordersData, setOrdersData] = useState<Orders[]>([]);
+  const productsList = useStore((state) => state.products.productsList);
 
   useEffect(() => {
     fetchAllOrders();
     fetchAllCustomers();
+    fetchAllProducts();
   }, []);
-
-  useEffect(() => {
-    if (ordersList) {
-      setOrdersData(ordersList);
-    }
-  }, [ordersList]);
 
   const columnsOrder: GridColDef[] = [
     {
@@ -77,6 +72,32 @@ const Order: React.FC = () => {
       ),
     },
     {
+      field: 'orderDetails',
+      headerName: 'Order Details',
+      width: 150,
+      renderCell: (params) => (
+        <Box>
+          <Typography fontSize={'0.875rem'} value='body2'>
+            {params.row.orderDetails.map((orderDetail: OrderDetail) => {
+              const product = productsList?.find(
+                (product) => product.guid === orderDetail.productGuid,
+              );
+              return (
+                <Box key={orderDetail.id}>
+                  <Typography fontSize={'0.875rem'} fontWeight={600} value='body2'>
+                    {product?.name}
+                  </Typography>
+                  <Typography fontSize={'0.875rem'} value='body2'>
+                    Quantity: {orderDetail.quantity}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
       field: 'totalPrice',
       headerName: 'Total Price',
       width: 120,
@@ -91,35 +112,35 @@ const Order: React.FC = () => {
           case 'Refunded':
             color = 'default';
             break;
-          case 'Completed':
+          case 'true':
             color = 'success';
             break;
-          case 'Pending':
+          case 'false':
             color = 'warning';
             break;
           default:
             color = 'default';
             break;
         }
-        return <Chip label={params.value} color={color} />;
+        return <Chip label={params.value === 'true' ? 'Completed' : 'Pending'} color={color} />;
       },
     },
-    {
-      field: 'functions',
-      headerName: '',
-      width: 80,
-      sortable: false,
-      renderCell: () => (
-        <Box>
-          <IconButton size='small'>
-            <img width={18} height={18} src={pencilIcon} alt='' />
-          </IconButton>
-          <IconButton size='small'>
-            <img width={18} height={18} src={trashIcon} alt='' />
-          </IconButton>
-        </Box>
-      ),
-    },
+    // {
+    //   field: 'functions',
+    //   headerName: '',
+    //   width: 80,
+    //   sortable: false,
+    //   renderCell: () => (
+    //     <Box>
+    //       <IconButton size='small'>
+    //         <img width={18} height={18} src={pencilIcon} alt='' />
+    //       </IconButton>
+    //       <IconButton size='small'>
+    //         <img width={18} height={18} src={trashIcon} alt='' />
+    //       </IconButton>
+    //     </Box>
+    //   ),
+    // },
   ];
   const paginationModel = { page: 0, pageSize: 5 };
 
@@ -128,7 +149,7 @@ const Order: React.FC = () => {
       <Grid2 size={12}>
         <Paper sx={{ p: 0 }}>
           <DataGrid
-            rows={ordersData}
+            rows={ordersList}
             columns={columnsOrder}
             initialState={{ pagination: { paginationModel } }}
             pageSizeOptions={[5, 10]}

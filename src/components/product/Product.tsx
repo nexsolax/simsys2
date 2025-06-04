@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 import { pencilIcon, trashIcon } from '../../shared/icon/icon';
 import CreateProductDialog from './create/CreateProduct';
@@ -35,19 +36,12 @@ const Product: React.FC = () => {
   const [openCreateProduct, setOpenCreateProduct] = useState(false);
   const [openEditProduct, setOpenEditProduct] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Products | null>(null);
-  const [productsData, setProductsData] = useState<Products[]>([]);
 
   useEffect(() => {
     fetchAllProducts();
     fetchAllCategories();
     fetchAllVariants();
   }, []);
-
-  useEffect(() => {
-    if (productsList) {
-      setProductsData(productsList);
-    }
-  }, [productsList]);
 
   const columnsProduct: GridColDef[] = [
     {
@@ -60,7 +54,7 @@ const Product: React.FC = () => {
           <img
             style={{ width: 50, height: 50, borderRadius: '8px' }}
             src={
-              params.row.images ||
+              params.row?.image ??
               'https://api-dev-minimal-v630.pages.dev/assets/images/m-product/product-1.webp'
             }
             alt={params.row.name}
@@ -76,7 +70,7 @@ const Product: React.FC = () => {
                 e.stopPropagation();
                 e.preventDefault();
 
-                navigate(`/dashboard/product/detail`);
+                navigate(`/dashboard/product/detail/${params.row.id}`);
               }}
             >
               {params.row.name}
@@ -102,6 +96,11 @@ const Product: React.FC = () => {
           <Typography variant='body2'>{params.row.description}</Typography>
         </Box>
       ),
+    },
+    {
+      field: 'price',
+      headerName: 'Price',
+      width: 120,
     },
     {
       field: 'variant',
@@ -145,21 +144,21 @@ const Product: React.FC = () => {
         </Box>
       ),
     },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 100,
-      renderCell: (params) => (
-        <Chip
-          color={params.value === 'Active' ? 'info' : 'default'}
-          label={params.value === 'Active' ? 'Active' : 'Inactive'}
-        />
-      ),
-    },
+    // {
+    //   field: 'status',
+    //   headerName: 'Status',
+    //   width: 100,
+    //   renderCell: (params) => (
+    //     <Chip
+    //       color={params.value === 'Active' ? 'info' : 'default'}
+    //       label={params.value === 'Active' ? 'Active' : 'Inactive'}
+    //     />
+    //   ),
+    // },
     {
       field: 'functions',
       headerName: '',
-      width: 80,
+      width: 120,
       sortable: false,
       renderCell: (params) => (
         <Box>
@@ -215,7 +214,7 @@ const Product: React.FC = () => {
         <Grid2 size={12}>
           <Paper sx={{ p: 0 }}>
             <DataGrid
-              rows={productsData}
+              rows={productsList}
               columns={columnsProduct}
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
