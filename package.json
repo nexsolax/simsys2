@@ -1,9 +1,5 @@
 {
-<<<<<<< HEAD
-  "name": "simsys2",
-=======
   "name": "minimals-dashboard",
->>>>>>> branch1
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -26,10 +22,7 @@
     "@nivo/core": "^0.88.0",
     "@nivo/pie": "^0.88.0",
     "@toolpad/core": "^0.12.1",
-<<<<<<< HEAD
-=======
     "@types/uuid": "^10.0.0",
->>>>>>> branch1
     "axios": "^1.8.1",
     "embla-carousel-react": "^8.5.2",
     "formik": "^2.4.6",
@@ -39,11 +32,8 @@
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
     "react-router-dom": "^7.3.0",
-<<<<<<< HEAD
-=======
     "react-toastify": "^11.0.5",
     "uuid": "^11.1.0",
->>>>>>> branch1
     "yup": "^1.6.1",
     "zustand": "^5.0.3"
   },
