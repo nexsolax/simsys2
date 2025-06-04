@@ -231,6 +231,9 @@ const ProductDetail: React.FC = () => {
               >
                 Add to cart
               </Button>
+              <Button variant='contained' color='primary' sx={{ flex: 1, bgcolor: '#333' }}>
+                Buy now
+              </Button>
             </Box>
           </Box>
         </Grid2>
