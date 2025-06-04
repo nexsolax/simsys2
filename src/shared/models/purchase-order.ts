@@ -21,6 +21,14 @@ export interface CreatePurchaseOrderRequest {
   purchaseOrderDetails: CreatePurchaseOrderDetailRequest[];
 }
 
+export interface UpdatePurchaseOrderRequest {
+  supplierGuid: string;
+  description: string;
+  totalPrice: number;
+  isActive: string;
+  purchaseOrderDetails: CreatePurchaseOrderDetailRequest[];
+}
+
 export interface CreatePurchaseOrderDetailRequest {
   productGuid: string;
   quantity: number;

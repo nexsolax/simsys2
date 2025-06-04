@@ -22,6 +22,7 @@ import inventoryIcon from '../../assets/icons/ic-inventory.svg';
 import purchaseOrderIcon from '../../assets/icons/ic-purchase-order.svg';
 import transferRequestIcon from '../../assets/icons/ic-inventory.svg';
 import appLogo from '../../assets/images/warehouse-logo.svg';
+import cartIcon from '../../assets/icons/ico-cart.svg';
 
 export {
   analyticsIcon,
@@ -48,4 +49,5 @@ export {
   purchaseOrderIcon,
   transferRequestIcon,
   appLogo,
+  cartIcon,
 };

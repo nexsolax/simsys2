@@ -9,13 +9,15 @@ export interface Consignments {
   createDate: Date;
   supplierGuid: string;
   purchaseOrderGuid: string;
+  payPrice: number;
+  totalPrice: number;
 }
 
 export interface CreateConsignmentRequest {
   sku: string;
   name: string;
   description: string;
-  price: number;
+  payPrice: number;
   quantity: number;
   supplierGuid: string;
   purchaseOrderGuid: string;
@@ -25,7 +27,7 @@ export interface UpdateConsignmentRequest {
   sku: string;
   name: string;
   description: string;
-  price: number;
+  payPrice: number;
   quantity: number;
   supplierGuid: string;
   purchaseOrderGuid: string;

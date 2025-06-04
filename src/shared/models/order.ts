@@ -10,9 +10,10 @@ export interface Orders {
 }
 
 export interface CreateOrderRequest {
-  orderGuid: string;
-  productGuid: string;
-  quantity: number;
+  customerGuid: string;
+  description: string;
+  totalPrice: number;
+  isActive: string;
 }
 
 export interface UpdateOrderRequest {
@@ -24,6 +25,18 @@ export interface UpdateOrderRequest {
 export interface OrderDetail {
   id: number;
   guid: string;
+  orderGuid: string;
+  productGuid: string;
+  quantity: number;
+}
+
+export interface CreateOrderDetailRequest {
+  orderGuid: string;
+  productGuid: string;
+  quantity: number;
+}
+
+export interface UpdateOrderDetailRequest {
   orderGuid: string;
   productGuid: string;
   quantity: number;
