@@ -1,7 +1,11 @@
 import { StoreSet } from '../store';
 import api from '../api/axios';
 import ENDPOINTS from '../api/endpoints';
-import { CreatePurchaseOrderRequest, PurchaseOrders } from '../shared/models/purchase-order';
+import {
+  CreatePurchaseOrderRequest,
+  PurchaseOrders,
+  UpdatePurchaseOrderRequest,
+} from '../shared/models/purchase-order';
 
 export interface PurchaseOrdersState {
   purchaseOrdersList: PurchaseOrders[] | undefined;
@@ -11,6 +15,7 @@ export interface PurchaseOrdersActions {
   fetchAllPurchaseOrders: () => Promise<void>;
   fetchOnePurchaseOrder: (id: string) => Promise<PurchaseOrders>;
   createPurchaseOrder: (purchaseOrder: CreatePurchaseOrderRequest) => Promise<any>;
+  updatePurchaseOrder: (purchaseOrder: UpdatePurchaseOrderRequest, guid: string) => Promise<any>;
   deletePurchaseOrder: (id: string) => Promise<void>;
 }
 
@@ -41,6 +46,13 @@ export function purchaseOrdersActions(set: StoreSet): PurchaseOrdersActions {
     createPurchaseOrder: async (purchaseOrder: CreatePurchaseOrderRequest) => {
       try {
         await api.post(ENDPOINTS.PURCHASE_ORDERS.CREATE, purchaseOrder);
+      } catch (error: any) {
+        console.log(error);
+      }
+    },
+    updatePurchaseOrder: async (purchaseOrder: UpdatePurchaseOrderRequest, guid: string) => {
+      try {
+        await api.put(ENDPOINTS.PURCHASE_ORDERS.UPDATE(guid), purchaseOrder);
       } catch (error: any) {
         console.log(error);
       }
