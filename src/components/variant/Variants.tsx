@@ -34,35 +34,6 @@ const Variants: React.FC = () => {
       width: 200,
       flex: 1,
     },
-    {
-      field: 'functions',
-      headerName: '',
-      width: 100,
-      sortable: false,
-      renderCell: (params) => (
-        <Box>
-          <IconButton
-            size='small'
-            onClick={() => {
-              setOpenCreateVariant(true);
-              setOpenEditVariant(true);
-              setCurrentVariant(params.row);
-            }}
-          >
-            <img width={18} height={18} src={pencilIcon} alt='Edit' />
-          </IconButton>
-          <IconButton
-            size='small'
-            onClick={() => {
-              setConfirmDelete(true);
-              setCurrentVariant(params.row);
-            }}
-          >
-            <img width={18} height={18} src={trashIcon} alt='Delete' />
-          </IconButton>
-        </Box>
-      ),
-    },
   ];
 
   const paginationModel = { page: 0, pageSize: 5 };
