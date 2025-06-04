@@ -231,9 +231,12 @@ const ProductDetail: React.FC = () => {
               >
                 Add to cart
               </Button>
+<<<<<<< HEAD
               <Button variant='contained' color='primary' sx={{ flex: 1, bgcolor: '#333' }}>
                 Buy now
               </Button>
+=======
+>>>>>>> branch1
             </Box>
           </Box>
         </Grid2>

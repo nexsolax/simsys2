@@ -11,6 +11,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
 
   const formik = useFormik({
+<<<<<<< HEAD
     initialValues: { username: '', password: '' },
     validationSchema: Yup.object({
       username: Yup.string().required('Required'),
@@ -18,6 +19,15 @@ const Login: React.FC = () => {
     }),
     onSubmit: async (values) => {
       const result = await login(values.username, values.password);
+=======
+    initialValues: { email: '', password: '' },
+    validationSchema: Yup.object({
+      email: Yup.string().required('Required'),
+      password: Yup.string().min(6, 'Too short').required('Required'),
+    }),
+    onSubmit: async (values) => {
+      const result = await login(values.email, values.password);
+>>>>>>> branch1
       if (result === 'LOGIN_SUCCESS') navigate('/dashboard/overview');
     },
   });
@@ -46,10 +56,17 @@ const Login: React.FC = () => {
               <TextField
                 fullWidth
                 sx={{ mb: 1, mt: 2 }}
+<<<<<<< HEAD
                 label='Username'
                 {...formik.getFieldProps('username')}
                 error={formik.touched.username && Boolean(formik.errors.username)}
                 helperText={formik.touched.username && formik.errors.username}
+=======
+                label='Email address'
+                {...formik.getFieldProps('email')}
+                error={formik.touched.email && Boolean(formik.errors.email)}
+                helperText={formik.touched.email && formik.errors.email}
+>>>>>>> branch1
               />
               <TextField
                 fullWidth

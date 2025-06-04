@@ -26,7 +26,11 @@ export const MENU_ITEMS = [
         text: 'User',
         icon: userIcon,
         child: [
+<<<<<<< HEAD
           { pathName: 'list', text: 'List user', icon: userIcon },
+=======
+          { pathName: 'list', text: 'List', icon: userIcon },
+>>>>>>> branch1
           { pathName: 'role', text: 'Role', icon: userIcon },
         ],
       },
@@ -37,7 +41,11 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
+<<<<<<< HEAD
             text: 'List product',
+=======
+            text: 'List',
+>>>>>>> branch1
             icon: productIcon,
           },
           {
@@ -62,7 +70,11 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
+<<<<<<< HEAD
             text: 'List purchase order',
+=======
+            text: 'List',
+>>>>>>> branch1
             icon: purchaseOrderIcon,
           },
           // {
@@ -79,7 +91,11 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
+<<<<<<< HEAD
             text: 'List inventory',
+=======
+            text: 'List',
+>>>>>>> branch1
             icon: inventoryIcon,
           },
           {
@@ -96,7 +112,11 @@ export const MENU_ITEMS = [
         child: [
           {
             pathName: 'list',
+<<<<<<< HEAD
             text: 'List transfer-request',
+=======
+            text: 'List',
+>>>>>>> branch1
             icon: transferRequestIcon,
           },
         ],
