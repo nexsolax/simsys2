@@ -93,6 +93,13 @@ const ENDPOINTS = {
     UPDATE: (id: string) => `/orders/${id}`,
     DELETE: (id: string) => `/orders/${id}`,
   },
+  ORDER_DETAIL: {
+    GET_ALL: `/order-details`,
+    GET_ONE: (id: string) => `/order-details/${id}`,
+    CREATE: (orderGuid: string) => `/order-details/${orderGuid}`,
+    UPDATE: (id: string) => `/order-details/${id}`,
+    DELETE: (id: string) => `/order-details/${id}`,
+  },
   LOCATION: {
     GET_ALL: `/locations`,
     GET_ONE: (id: string) => `/locations/${id}`,

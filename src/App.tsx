@@ -23,6 +23,7 @@ import Role from './components/role/Role';
 import Customer from './components/customer/Customer';
 import TransferRequest from './components/transfer-request/TransferRequest';
 import Consignment from './components/consignment/Consignment';
+import ProfileDetail from './components/profile/ProfileDetail';
 
 import './App.css';
 
@@ -46,7 +47,7 @@ const App: React.FC = () => {
               <Route path='product/list' element={<Product />} />
               <Route path='product/category' element={<Category />} />
               <Route path='product/variant' element={<Variant />} />
-              <Route path='product/detail' element={<ProductDetail />} />
+              <Route path='product/detail/:id' element={<ProductDetail />} />
               <Route path='user' element={<User />} />
               <Route path='user/list' element={<User />} />
               <Route path='user/role' element={<Role />} />
@@ -60,6 +61,7 @@ const App: React.FC = () => {
               <Route path='inventory/list' element={<Inventory />} />
               <Route path='inventory/location' element={<Location />} />
               <Route path='transfer-request/list' element={<TransferRequest />} />
+              <Route path='profile' element={<ProfileDetail />} />
               <Route
                 path='analytics'
                 element={

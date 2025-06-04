@@ -61,6 +61,7 @@ import {
 } from './store/transactions';
 import { AuthActions, authActions, AuthState, initialAuth } from './store/auth';
 import { initialOrders, ordersActions, OrdersActions, OrdersState } from './store/orders';
+import { initialCart, cartActions, CartState, CartActions } from './store/cart';
 
 export interface State {
   auth: AuthState;
@@ -78,6 +79,7 @@ export interface State {
   transferRequests: TransferRequestsState;
   transactions: TransactionsState;
   orders: OrdersState;
+  cart: CartState;
 }
 
 export type Actions = AuthActions &
@@ -94,7 +96,8 @@ export type Actions = AuthActions &
   LocationsActions &
   TransferRequestsActions &
   TransactionsActions &
-  OrdersActions;
+  OrdersActions &
+  CartActions;
 
 export type Store = State & Actions;
 export type StoreGet = () => Store;
@@ -132,5 +135,7 @@ export const useStore = create<Store, [['zustand/immer', never]]>(
     ...transactionsActions(set),
     orders: initialOrders,
     ...ordersActions(set),
+    cart: initialCart,
+    ...cartActions(set),
   })),
 );
